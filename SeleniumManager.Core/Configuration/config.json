@@ -1,0 +1,7 @@
+{
+  "Gridhost": "localhost:4444",
+  "drivers": ["chrome"],  
+  "endpoints": {
+    "status": "/status"
+  }
+}
