@@ -32,7 +32,6 @@ namespace SeleniumManager.Core
         {
             Assembly assembly = Assembly.GetExecutingAssembly();
             string resourcePath = $"{assembly.GetName().Name}.{resourceName}";
-            string[] resourceNames = assembly.GetManifestResourceNames();
 
             using (Stream stream = assembly.GetManifestResourceStream(resourcePath))
 
@@ -49,7 +48,7 @@ namespace SeleniumManager.Core
             {
                 string configJson = File.ReadAllText(configFilePath);
                 return JsonConvert.DeserializeObject<ConfigurationSettings>(configJson);
-            }
+                }
             catch (FileNotFoundException)
             {
                 // Handle missing config file
