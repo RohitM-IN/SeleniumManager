@@ -5,7 +5,6 @@ namespace SeleniumManager.ConsoleApp
 {
     internal class Program
     {
-        static Task jartask;
         static Process p;
         static void Main(string[] args)
         {

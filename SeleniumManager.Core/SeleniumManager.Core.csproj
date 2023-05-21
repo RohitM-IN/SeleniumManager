@@ -15,6 +15,7 @@ This include managing Queues, Parallel Tests, etc.</Description>
     <Copyright>MIT License</Copyright>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
     <PackageIcon>icon.png</PackageIcon>
+    <AssemblyVersion>1.0.0.1</AssemblyVersion>
   </PropertyGroup>
 
   <ItemGroup>
@@ -29,7 +30,7 @@ This include managing Queues, Parallel Tests, etc.</Description>
 
   <ItemGroup>
     <None Include="..\.editorconfig" Link=".editorconfig" />
-    <None Include="..\icon.png">
+    <None Include="..\Resources\icon.png">
       <Pack>True</Pack>
       <PackagePath>\</PackagePath>
     </None>
