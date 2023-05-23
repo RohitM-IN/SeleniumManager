@@ -2,6 +2,8 @@
 
 Selenium Grid Manager is a C# library for managing multiple Selenium WebDriver instances in parallel using Selenium Grid.
 
+> Note: As a solo developer I only got time on weekends as i do have a job so you can only expect any updates on this project on weekends.
+
 ## Table of Contents
 
 - [Overview](#overview)
