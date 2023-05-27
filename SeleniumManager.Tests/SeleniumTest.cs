@@ -1,4 +1,5 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+using SeleniumManager.Core;
 using System;
 
 namespace SeleniumManager.Tests
@@ -6,16 +7,22 @@ namespace SeleniumManager.Tests
     [TestClass]
     public class SeleniumTest
     {
-        [TestMethod]
-        public void TestSelenium()
+        private Core.SeleniumManager? _seleniumManager;
+        private ConfigManager? _configManager;
+
+        [TestInitialize()]
+        public void init()
         {
-            //TODO
+            _configManager = new ConfigManager();
+            _seleniumManager = new Core.SeleniumManager(_configManager);
         }
 
         [TestMethod]
-        public void ParallelTestSelenium()
+        public void HeartbeatTest()
         {
-            //TODO
+            var availableInstance = _seleniumManager?.GetAvailableInstances().Result;
+            Assert.IsTrue(availableInstance > 0);
+            Console.WriteLine("Available Sessions: " + availableInstance.ToString());
         }
     }
 }

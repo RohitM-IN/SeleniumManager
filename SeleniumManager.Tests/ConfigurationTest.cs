@@ -10,7 +10,7 @@ namespace SeleniumManager.Tests
         public void ConfigTest()
         {
             var config = new ConfigManager();
-            Assert.AreEqual(config.configSettings.GridHost, "localhost:4444");
+            Assert.AreEqual(config.configSettings.GridHost, "http://127.0.0.1:4444");
         }
     }
 }
