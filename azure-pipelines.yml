@@ -1,0 +1,40 @@
+
+pool:
+  vmImage: ubuntu-latest
+
+trigger: none
+pr: none 
+
+stages:
+
+  - stage:
+    displayName: Build .NET application
+    jobs:
+      - job:
+        displayName: build job
+        steps:
+          - task: UseDotNet@2
+            displayName: Use .NET6 to build
+            inputs:
+              version: '6.0.x'
+              includePreviewVersions: true
+          - task: DotNetCoreCLI@2
+            displayName: Building Visual studio solution
+            inputs:
+              command: 'build'
+              projects: '**/*.csproj'
+              arguments: '--configuration debug'
+
+  - stage: 
+    displayName: Run unit tests
+    jobs:
+      - job:
+        displayName: unit tests job
+        steps:
+          - task: DotNetCoreCLI@2
+            displayName: Run Visual studio tests
+            inputs:
+              command: test
+              projects: '**/*Test*/*.csproj'
+              arguments: '--configuration debug'
+          
