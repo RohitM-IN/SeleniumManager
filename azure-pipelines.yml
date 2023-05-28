@@ -16,14 +16,14 @@ stages:
           - task: UseDotNet@2
             displayName: Use .NET6 to build
             inputs:
-              version: '6.0.x'
+              version: '7.0.x'
               includePreviewVersions: true
           - task: DotNetCoreCLI@2
             displayName: Building Visual studio solution
             inputs:
               command: 'build'
               projects: '**/*.csproj'
-              arguments: '--configuration debug'
+              arguments: '--configuration release'
 
   - stage: 
     displayName: Run unit tests
@@ -36,5 +36,5 @@ stages:
             inputs:
               command: test
               projects: '**/*Test*/*.csproj'
-              arguments: '--configuration debug'
+              arguments: '--configuration release'
           
