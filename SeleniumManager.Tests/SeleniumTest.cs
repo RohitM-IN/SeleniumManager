@@ -7,7 +7,7 @@ namespace SeleniumManager.Tests
     [TestClass]
     public class SeleniumTest
     {
-        private Core.SeleniumManager? _seleniumManager;
+        private Core.SeleniumManager _seleniumManager;
         private ConfigManager? _configManager;
 
         [TestInitialize()]
@@ -20,9 +20,9 @@ namespace SeleniumManager.Tests
         [TestMethod]
         public void HeartbeatTest()
         {
-            var availableInstance = _seleniumManager?.GetAvailableInstances().Result;
-            Assert.IsTrue(availableInstance > 0);
-            Console.WriteLine("Available Sessions: " + availableInstance.ToString());
+            _seleniumManager.GetAvailableInstances().Wait();
+            Assert.IsTrue(_seleniumManager.AvailableSessions > 0);
+            Console.WriteLine("Available Sessions: " + _seleniumManager.AvailableSessions.ToString());
         }
     }
 }

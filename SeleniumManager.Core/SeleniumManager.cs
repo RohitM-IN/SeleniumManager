@@ -20,8 +20,8 @@ namespace SeleniumManager.Core
         private readonly ConfigurationSettings _configSettings;
         private readonly HttpClient httpClient;
 
-        public int? _maxSessions { get; private set; } = 0;
-        public int? _availableSessions { get; private set; } = 0;
+        public int? MaxSessions { get; private set; } = 0;
+        public int? AvailableSessions { get; private set; } = 0;
         #endregion
 
         #region Constructor
@@ -50,7 +50,7 @@ namespace SeleniumManager.Core
 
             getSessions(nodeStatus);
 
-            return _availableSessions;
+            return AvailableSessions;
         }
 
         #endregion
@@ -72,19 +72,19 @@ namespace SeleniumManager.Core
         {
             if (nodeStatus == null) 
             {
-                _availableSessions = _maxSessions =  null;
+                AvailableSessions = MaxSessions =  null;
                 return;
             }
 
-            _maxSessions = 0;
-            _availableSessions = 0;
+            MaxSessions = 0;
+            AvailableSessions = 0;
             foreach (var node in nodeStatus.value.nodes)
             {
-                _maxSessions += (int)node.maxSessions;
+                MaxSessions += (int)node.maxSessions;
                 foreach (var slot in node.slots)
                 {
                     if (slot.session == null)
-                        _availableSessions++;
+                        AvailableSessions++;
                 }
             }
         }
