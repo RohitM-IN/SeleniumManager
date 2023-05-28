@@ -12,6 +12,7 @@ namespace SeleniumManager.Core.DataContract
         public string GridHost { get; set; }
         public List<string> Drivers { get; set; }
         public string Secret { get; set; }
+        public int MaxConcurrency { get; set; }
         public Endpoints Endpoints { get; set; }
     }
 }
