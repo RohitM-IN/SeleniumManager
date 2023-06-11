@@ -18,6 +18,14 @@ This include managing Queues, Parallel Tests, etc.</Description>
 	<Version>0.0.0.1-alpha</Version>
   </PropertyGroup>
 
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <NoWarn>1701;1702;8618</NoWarn>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <NoWarn>1701;1702;8618</NoWarn>
+  </PropertyGroup>
+
   <ItemGroup>
     <None Remove="Configuration\config.json" />
   </ItemGroup>
