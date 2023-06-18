@@ -9,6 +9,6 @@ namespace SeleniumManager.Core.Interface
 {
     public interface ISeleniumManager
     {
-        void EnqueueAction(Action<IWebDriver> action);
+        Task<string> EnqueueAction(Func<IWebDriver, string> action);
     }
 }

@@ -43,11 +43,65 @@ namespace SeleniumManager.Core
 
         #region Public Methods
 
-        public virtual void EnqueueAction(Action<IWebDriver> action)
+        public virtual Task<string> EnqueueAction(Func<IWebDriver, string> action)
         {
-            _queue.Enqueue(action); 
-        }
+            var tcs = new TaskCompletionSource<string>();
 
+            _queue.Enqueue(driver =>
+            {
+                try
+                {
+                    // Execute the action and get the result
+                    var result = action(driver);
+
+                    // Set the result as the task completion result
+                    tcs.SetResult(result);
+                }
+                catch (Exception ex)
+                {
+                    // Set the exception as the task completion exception
+                    tcs.SetException(ex); 
+                }
+                finally 
+                { 
+                    driver?.Dispose();
+                    _semaphore.Release(); 
+                }
+            });
+
+            return tcs.Task;
+        }
+        private async void TryExecuteNext()
+        {
+            await _semaphore.WaitAsync(); // Acquire the semaphore
+
+            if (_queue.TryDequeue(out var action))
+            {
+                // TODO: make it like get the driver first and then process the action
+                try
+                {
+                    // for now only using chrome for testing
+                    IWebDriver _driver = CreateDriverInstance("Chrome");
+                    action(_driver);
+
+                    // Release the semaphore to allow other threads to acquire it
+                    _semaphore.Release();
+
+                    // Recursively call TryExecuteNext to process the next action in the queue
+                    TryExecuteNext();
+                }
+                catch (Exception ex)
+                {
+                    // Handle any exceptions that occurred during action execution
+
+                    // Release the semaphore even if an exception occurs
+                    _semaphore.Release();
+
+                    // Recursively call TryExecuteNext to process the next action in the queue
+                    TryExecuteNext();
+                }
+            }
+        }
         public async Task<int> GetAvailableInstances()
         {
             var nodeStatus = await GetStatus();
@@ -144,9 +198,8 @@ namespace SeleniumManager.Core
                 case "edge":
                     driver = new EdgeDriver();
                     break;
-                // Add more cases for other supported browsers
                 default:
-                    throw new ArgumentException("Invalid browser name.");
+                    throw new ArgumentException("Browser not supported");
             }
 
             return driver;
