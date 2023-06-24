@@ -2,6 +2,7 @@
 using OpenQA.Selenium.Chrome;
 using OpenQA.Selenium.Edge;
 using OpenQA.Selenium.Firefox;
+using OpenQA.Selenium.Remote;
 using SeleniumManager.Core.DataContract;
 using SeleniumManager.Core.Interface;
 using System;
@@ -68,16 +69,16 @@ namespace SeleniumManager.Core
                     _semaphore.Release(); 
                 }
             });
-
+            TryExecuteNext();
             return tcs.Task;
         }
-        private async void TryExecuteNext()
+        public async void TryExecuteNext()
         {
             await _semaphore.WaitAsync(); // Acquire the semaphore
 
             if (_queue.TryDequeue(out var action))
             {
-                // TODO: make it like get the driver first and then process the action
+                // TODO: make it like get the driver first and then process the action 
                 try
                 {
                     // for now only using chrome for testing
@@ -99,6 +100,7 @@ namespace SeleniumManager.Core
 
                     // Recursively call TryExecuteNext to process the next action in the queue
                     TryExecuteNext();
+                    throw;
                 }
             }
         }
@@ -190,13 +192,17 @@ namespace SeleniumManager.Core
             switch (browserName.ToLower())
             {
                 case "firefox":
-                    driver = new FirefoxDriver();
+                    var firefoxOptions = new FirefoxOptions();
+                    driver = new RemoteWebDriver(new Uri(_configSettings.GridHost.ToString()), firefoxOptions);
+
                     break;
                 case "chrome":
-                    driver = new ChromeDriver();
+                    var chromeOptions = new ChromeOptions();
+                    driver = new RemoteWebDriver(new Uri(_configSettings.GridHost.ToString()), chromeOptions);
                     break;
                 case "edge":
-                    driver = new EdgeDriver();
+                    var edgeOptions = new EdgeOptions();
+                    driver = new RemoteWebDriver(new Uri(_configSettings.GridHost.ToString()), edgeOptions);
                     break;
                 default:
                     throw new ArgumentException("Browser not supported");
