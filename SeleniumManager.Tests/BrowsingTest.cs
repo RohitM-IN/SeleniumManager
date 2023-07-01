@@ -22,9 +22,9 @@ namespace SeleniumManager.Tests
         }
 
         [TestMethod]
-        public void TestBrouse()
+        public async Task TestBrouse()
         {
-            _seleniumManager.EnqueueAction(BrouseWebsite);
+            var data = await _seleniumManager.EnqueueAction(BrouseWebsite);
 
             // Start processing the actions
             _seleniumManager.TryExecuteNext();
@@ -40,7 +40,7 @@ namespace SeleniumManager.Tests
             {
                 Task task = Task.Run(async () =>
                 {
-                    await _seleniumManager.EnqueueAction(BrouseGoogleWebsite);
+                    var data = await _seleniumManager.EnqueueAction(BrouseGoogleWebsite);
                     _seleniumManager.TryExecuteNext();
                     Thread.Sleep(2000);
                 });
@@ -56,7 +56,7 @@ namespace SeleniumManager.Tests
         {
             try
             {
-                await _seleniumManager.EnqueueAction(BrouseWebsiteFail);
+                var data = await _seleniumManager.EnqueueAction(BrouseWebsiteFail);
 
                 // Start processing the actions
                 _seleniumManager.TryExecuteNext();
@@ -78,12 +78,12 @@ namespace SeleniumManager.Tests
                 Console.WriteLine(driver.Title + " Process ID:" + System.Threading.Thread.CurrentThread.ManagedThreadId);
 
             }
-            catch (Exception ex)
+            catch (Exception)
             {
 
                 throw;
             }
-            return null;
+            return string.Empty;
         }
 
         private string BrouseWebsite(IWebDriver driver)
@@ -98,12 +98,12 @@ namespace SeleniumManager.Tests
                 driver.Dispose();
 
             }
-            catch (Exception ex)
+            catch (Exception)
             {
 
                 throw;
             }
-            return null;
+            return string.Empty;
         }
         private string BrouseWebsiteFail(IWebDriver driver)
         {
@@ -115,7 +115,7 @@ namespace SeleniumManager.Tests
             {
                 throw new NoSuchElementException("Element not found.");
             }
-            return null;
+            return string.Empty;
         }
 
     }
