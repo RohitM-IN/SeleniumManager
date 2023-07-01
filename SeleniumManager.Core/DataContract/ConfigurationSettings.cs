@@ -14,5 +14,6 @@ namespace SeleniumManager.Core.DataContract
         public string Secret { get; set; }
         public int MaxConcurrency { get; set; }
         public Endpoints Endpoints { get; set; }
+        public Options Options { get; set; } = new Options();
     }
 }

@@ -36,7 +36,7 @@ namespace SeleniumManager.Core
         {
             _configSettings = configManager.configSettings;
             httpClient = new HttpClient();   
-            _semaphore = new SemaphoreSlim(GetAvailableInstances().Result);
+            _semaphore = new SemaphoreSlim(GetAvailableInstances().Result,1000);
             _queue = new ConcurrentQueue<Action<IWebDriver>>();
         }
 
@@ -61,14 +61,16 @@ namespace SeleniumManager.Core
                 catch (Exception ex)
                 {
                     // Set the exception as the task completion exception
-                    tcs.SetException(ex); 
+                    tcs.SetException(ex);
+                    throw new Exception("Error Occoured inside Action", ex);
                 }
                 finally 
                 { 
+                    // Dispose the driver if not already done
                     driver?.Dispose();
-                    _semaphore.Release(); 
                 }
             });
+
             TryExecuteNext();
             return tcs.Task;
         }
@@ -85,6 +87,9 @@ namespace SeleniumManager.Core
                     IWebDriver _driver = CreateDriverInstance("Chrome");
                     action(_driver);
 
+                    // Release driver
+                    _driver.Dispose();
+
                     // Release the semaphore to allow other threads to acquire it
                     _semaphore.Release();
 
@@ -93,18 +98,21 @@ namespace SeleniumManager.Core
                 }
                 catch (Exception ex)
                 {
-                    // Handle any exceptions that occurred during action execution
-
                     // Release the semaphore even if an exception occurs
                     _semaphore.Release();
 
                     // Recursively call TryExecuteNext to process the next action in the queue
                     TryExecuteNext();
-                    throw;
+
+                    throw new Exception("There was error while performing the delegate action", ex);
+                }
+                finally 
+                { 
+                    _semaphore.Release(); 
                 }
             }
         }
-        public async Task<int> GetAvailableInstances()
+        public virtual async Task<int> GetAvailableInstances()
         {
             var nodeStatus = await GetStatus();
 
@@ -115,7 +123,7 @@ namespace SeleniumManager.Core
             return AvailableSessions;
         }
 
-        public async Task<dynamic?> GetHeartBeat()
+        public virtual async Task<dynamic?> GetHeartBeat()
         {
             var nodeStatus = await GetStatus();
 
@@ -124,10 +132,52 @@ namespace SeleniumManager.Core
             return nodeStatus;
         }
 
+        public virtual IWebDriver CreateDriverInstance(string browserName)
+        {
+            IWebDriver driver;
+
+            switch (GetAvailableDriverName(browserName).ToLower())
+            {
+                case "firefox":
+                    driver = new RemoteWebDriver(new Uri(_configSettings.GridHost.ToString()), _configSettings.Options.firefoxOptions);
+
+                    break;
+                case "chrome":
+                    driver = new RemoteWebDriver(new Uri(_configSettings.GridHost.ToString()), _configSettings.Options.chromeOptions);
+                    break;
+                case "edge":
+                    driver = new RemoteWebDriver(new Uri(_configSettings.GridHost.ToString()), _configSettings.Options.edgeOptions);
+                    break;
+                case "safari":
+                    driver = new RemoteWebDriver(new Uri(_configSettings.GridHost.ToString()), _configSettings.Options.safariOptions);
+                    break;
+                case "ie":
+                    driver = new RemoteWebDriver(new Uri(_configSettings.GridHost.ToString()), _configSettings.Options.internetExplorerOptions);
+                    break;
+                default:
+                    throw new ArgumentException("Browser not supported yet!");
+            }
+
+            return driver;
+        }
+
+        public string GetAvailableDriverName(string browserName)
+        {
+            var data = GetHeartBeat();
+            if(data != null)
+            {
+                // TODO:check for availablity 
+
+                // return if available
+                return browserName;
+            }
+
+            throw new Exception("Cannot Get Heart Beat");
+        }
+
         #endregion
 
         #region Private Methods
-
         private async Task<dynamic?> GetStatus()
         {
             try
@@ -143,8 +193,7 @@ namespace SeleniumManager.Core
             }
             catch (Exception ex)
             {
-                Console.WriteLine("Error :"+ex.Message+" Trace: "+ex.StackTrace);
-                throw;                
+                throw new Exception("There was en error while getting status", ex);
             }
         }
 
@@ -176,40 +225,6 @@ namespace SeleniumManager.Core
         {
             AvailableSessions = FreeSessions = TotalSessions = ConcurrentSessions = 0;
         }
-
-        private async void TryExecuateNext()
-        {
-            await _semaphore.WaitAsync();
-
-            
-
-        }
-
-        public virtual IWebDriver CreateDriverInstance(string browserName)
-        {
-            IWebDriver driver;
-
-            switch (browserName.ToLower())
-            {
-                case "firefox":
-                    var firefoxOptions = new FirefoxOptions();
-                    driver = new RemoteWebDriver(new Uri(_configSettings.GridHost.ToString()), firefoxOptions);
-
-                    break;
-                case "chrome":
-                    var chromeOptions = new ChromeOptions();
-                    driver = new RemoteWebDriver(new Uri(_configSettings.GridHost.ToString()), chromeOptions);
-                    break;
-                case "edge":
-                    var edgeOptions = new EdgeOptions();
-                    driver = new RemoteWebDriver(new Uri(_configSettings.GridHost.ToString()), edgeOptions);
-                    break;
-                default:
-                    throw new ArgumentException("Browser not supported");
-            }
-
-            return driver;
-        }   
 
         #endregion
 

@@ -52,12 +52,21 @@ namespace SeleniumManager.Tests
         }
 
         [TestMethod]
-        public void TestBrouseFail()
+        public async Task TestBrouseFail()
         {
-            _seleniumManager.EnqueueAction(BrouseWebsiteFail);
+            try
+            {
+                await _seleniumManager.EnqueueAction(BrouseWebsiteFail);
 
-            // Start processing the actions
-            _seleniumManager.TryExecuteNext();
+                // Start processing the actions
+                _seleniumManager.TryExecuteNext();
+
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Error Message: \n" +ex.Message);
+                Console.WriteLine("StackTrace: \n" + ex.StackTrace);
+            }
 
         }
         private string BrouseGoogleWebsite(IWebDriver driver)
@@ -66,8 +75,7 @@ namespace SeleniumManager.Tests
             try
             {
                 driver.Url = "https://www.google.com/";
-
-                //driver.Dispose();
+                Console.WriteLine(driver.Title + " Process ID:" + System.Threading.Thread.CurrentThread.ManagedThreadId);
 
             }
             catch (Exception ex)
@@ -86,7 +94,7 @@ namespace SeleniumManager.Tests
                 driver.Url = "https://dev.azure.com/Rohit-IN/Selenium%20Manager/";
 
                 driver.FindElement(By.XPath("//a[@aria-label='Repos']")).Click();
-
+                Console.WriteLine(driver.Title);
                 driver.Dispose();
 
             }
