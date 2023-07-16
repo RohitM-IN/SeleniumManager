@@ -14,8 +14,8 @@
 This include managing Queues, Parallel Tests, etc.</Description>
     <Copyright>MIT License</Copyright>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
-	<AssemblyVersion>0.0.0.1</AssemblyVersion>
-	<Version>0.0.0.2-alpha</Version>
+	<AssemblyVersion>0.0.0.3</AssemblyVersion>
+	<Version>0.0.0.3-alpha</Version>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
