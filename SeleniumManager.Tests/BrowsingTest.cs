@@ -40,14 +40,15 @@ namespace SeleniumManager.Tests
             {
                 Task task = Task.Run(async () =>
                 {
-                    var data = await _seleniumManager.EnqueueAction(BrouseGoogleWebsite);
-                    _seleniumManager.TryExecuteNext();
-                    Thread.Sleep(2000);
+                    // Enqueue the action and wait for its completion
+                    await _seleniumManager.EnqueueAction(BrouseGoogleWebsite);
+                    Thread.Sleep(3000);
                 });
 
                 tasks.Add(task);
             }
 
+            // Wait for all tasks to complete
             await Task.WhenAll(tasks);
         }
 

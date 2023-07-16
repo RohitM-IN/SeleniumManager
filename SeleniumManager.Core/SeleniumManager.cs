@@ -1,4 +1,5 @@
-﻿using OpenQA.Selenium;
+﻿using Newtonsoft.Json.Linq;
+using OpenQA.Selenium;
 using OpenQA.Selenium.Chrome;
 using OpenQA.Selenium.Edge;
 using OpenQA.Selenium.Firefox;
@@ -20,6 +21,7 @@ namespace SeleniumManager.Core
         #region Declerations
 
         private readonly SemaphoreSlim _semaphore;
+        private readonly SemaphoreSlim _availableStereotypesSemaphore = new SemaphoreSlim(1, 1);
         private readonly ConcurrentQueue<Action<IWebDriver>> _queue;
         private readonly ConfigurationSettings _configSettings;
         private readonly HttpClient httpClient;
@@ -29,6 +31,15 @@ namespace SeleniumManager.Core
         public int ConcurrentSessions { get; private set; } = 0;
         public int AvailableSessions { get; private set; } = 0;
         public int TotalSessions { get; private set; } = 0;
+        public Dictionary<string, long> MaxStereotypes { get; private set; } = new();
+        public Dictionary<string, long> ConcurrentStereotypes { get; private set; } = new();
+        public Dictionary<string, long> AvailableStereotypes { get; private set; } = new();
+        public DateTime LastSessionDetails { get; private set; }
+        enum AdjustType
+        {
+            Create = 1,
+            Destroy = 2
+        }
         #endregion
 
         #region Constructor
@@ -80,18 +91,18 @@ namespace SeleniumManager.Core
 
             if (_queue.TryDequeue(out var action))
             {
+                string browserName = "";
                 // TODO: make it like get the driver first and then process the action 
                 try
                 {
                     // for now only using chrome for testing
-                    IWebDriver _driver = CreateDriverInstance("Chrome");
+                    IWebDriver _driver = CreateDriverInstance();
+                    ICapabilities capabilities = ((RemoteWebDriver)_driver).Capabilities;
+                    browserName = capabilities.GetCapability("browserName").ToString();
                     action(_driver);
-
+                    
                     // Release driver
                     _driver.Dispose();
-
-                    // Release the semaphore to allow other threads to acquire it
-                    _semaphore.Release();
 
                     // Recursively call TryExecuteNext to process the next action in the queue
                     TryExecuteNext();
@@ -108,7 +119,12 @@ namespace SeleniumManager.Core
                 }
                 finally 
                 { 
-                    _semaphore.Release(); 
+                    _semaphore.Release();
+                    await _availableStereotypesSemaphore.WaitAsync();
+                    if (!string.IsNullOrEmpty(browserName))
+                        AdjustInstance(browserName.ToLower(), AdjustType.Destroy);
+                    _availableStereotypesSemaphore.Release();
+
                 }
             }
         }
@@ -132,11 +148,11 @@ namespace SeleniumManager.Core
             return nodeStatus;
         }
 
-        public virtual IWebDriver CreateDriverInstance(string browserName)
+        public virtual IWebDriver CreateDriverInstance(string? browserName = null)
         {
             IWebDriver driver;
-
-            switch (GetAvailableDriverName(browserName).ToLower())
+            browserName = GetAvailableDriverName(browserName);
+            switch (browserName.ToLower())
             {
                 case "firefox":
                     driver = new RemoteWebDriver(new Uri(_configSettings.GridHost.ToString()), _configSettings.Options.firefoxOptions);
@@ -145,7 +161,7 @@ namespace SeleniumManager.Core
                 case "chrome":
                     driver = new RemoteWebDriver(new Uri(_configSettings.GridHost.ToString()), _configSettings.Options.chromeOptions);
                     break;
-                case "edge":
+                case "microsoftedge":
                     driver = new RemoteWebDriver(new Uri(_configSettings.GridHost.ToString()), _configSettings.Options.edgeOptions);
                     break;
                 case "safari":
@@ -157,24 +173,32 @@ namespace SeleniumManager.Core
                 default:
                     throw new ArgumentException("Browser not supported yet!");
             }
-
             return driver;
         }
 
-        public string GetAvailableDriverName(string browserName)
+        public string GetAvailableDriverName(string? browserName)
         {
-            var data = GetHeartBeat();
-            if(data != null)
+            // check if last session was gotten in last 1 min get from config default 1 min
+            if ((DateTime.Now - LastSessionDetails) > TimeSpan.FromSeconds(60))
             {
-                // TODO:check for availablity 
-
-                // return if available
-                return browserName;
+                var data = GetHeartBeat().Result;
+                if (data != null)
+                    getSessions(data);
+                else
+                    throw new Exception("Cannot Get Heart Beat");
             }
 
-            throw new Exception("Cannot Get Heart Beat");
-        }
+            // Check if the requested browser is available
+            if (!string.IsNullOrEmpty(browserName) && IsBrowserAvailable(browserName))
+                return browserName;
 
+            // If the requested browser is not available, find the best available browser based on statistics
+            string bestBrowser = FindBestAvailableBrowser().Result;
+
+            // Return the best available browser
+            return bestBrowser;         
+        }
+            
         #endregion
 
         #region Private Methods
@@ -206,6 +230,9 @@ namespace SeleniumManager.Core
             }
             MaxSessions = 0;
             ResetValues();
+            MaxStereotypes = new Dictionary<string, long>();
+            ConcurrentStereotypes = new Dictionary<string, long>();
+            AvailableStereotypes = new Dictionary<string, long>();
 
             foreach (var node in nodeStatus.value.nodes)
             {
@@ -213,12 +240,22 @@ namespace SeleniumManager.Core
                 foreach (var slot in node.slots)
                 {
                     TotalSessions++;
+                    MaxStereotypes.TryAdd((string)slot.stereotype.browserName, 0);
+                    ConcurrentStereotypes.TryAdd((string)slot.stereotype.browserName, 0);
+
                     if (slot.session == null)
                         FreeSessions++;
+                    else
+                        ConcurrentStereotypes[(string)slot.stereotype.browserName]++;
+                    MaxStereotypes[(string)slot.stereotype.browserName]++;
                 }
             }
+            _availableStereotypesSemaphore.Wait();
+            AvailableStereotypes = MaxStereotypes.ToDictionary(kv => kv.Key, kv => kv.Value - (ConcurrentStereotypes.TryGetValue(kv.Key, out var usedVal) ? usedVal : 0));
+            _availableStereotypesSemaphore.Release();
             ConcurrentSessions = TotalSessions - FreeSessions;
             AvailableSessions = MaxSessions - ConcurrentSessions;
+            LastSessionDetails = DateTime.Now;
         }
 
         private void ResetValues()
@@ -226,6 +263,73 @@ namespace SeleniumManager.Core
             AvailableSessions = FreeSessions = TotalSessions = ConcurrentSessions = 0;
         }
 
+        private bool IsBrowserAvailable(string browserName)
+        {
+            AvailableStereotypes.TryGetValue(browserName, out var _maxSessions);
+            if(_maxSessions == 0 )
+                return false;
+            return true;
+        }
+
+        private async Task<string> FindBestAvailableBrowser()
+        {
+            var statistics = new Dictionary<string, int>()
+            {
+                { "Chrome", 8 },
+                { "MicrosoftEdge", 8 },
+                { "Firefox", 0 },
+                { "Internet Explorer", 0 }
+            };
+
+            foreach (var kvp in statistics.OrderByDescending(x => x.Value))
+            {
+                await _availableStereotypesSemaphore.WaitAsync();
+                var browserName = kvp.Key;
+                var maxInstances = kvp.Value;
+                ConcurrentStereotypes.TryGetValue(kvp.Key.ToLower(), out var concurrentInstances);
+                AvailableStereotypes.TryGetValue(kvp.Key.ToLower(), out var availableInstances);
+
+                if (maxInstances >= concurrentInstances  && !string.IsNullOrEmpty(browserName))
+                {
+
+                    AdjustInstance(browserName.ToLower(), AdjustType.Create);
+
+                    _availableStereotypesSemaphore.Release();
+                    return browserName.ToString();
+                }
+                _availableStereotypesSemaphore.Release();
+                continue;
+
+            }
+
+            // If no available browser is found, return the browser with the highest instances count
+            return statistics.OrderByDescending(x => x.Value).FirstOrDefault().Key ?? "Chrome";
+        }
+
+        private void AdjustInstance(string key,AdjustType type)
+        {
+            switch (type)
+            {
+                case AdjustType.Create:
+                    if(ConcurrentStereotypes.ContainsKey(key))
+                        ConcurrentStereotypes[key]++;
+
+                    if(AvailableStereotypes.ContainsKey(key))
+                        AvailableStereotypes[key]--;
+
+                    break;
+                case AdjustType.Destroy:
+                    if (ConcurrentStereotypes.ContainsKey(key))
+                        ConcurrentStereotypes[key]--;
+
+                    if (AvailableStereotypes.ContainsKey(key))
+                        AvailableStereotypes[key]++;
+
+                    break;
+                default:
+                    break;
+            }
+        }
         #endregion
 
     }
