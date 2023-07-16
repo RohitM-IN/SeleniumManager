@@ -22,9 +22,9 @@ namespace SeleniumManager.Tests
         }
 
         [TestMethod]
-        public void TestBrouse()
+        public async Task TestBrouse()
         {
-            _seleniumManager.EnqueueAction(BrouseWebsite);
+            var data = await _seleniumManager.EnqueueAction(BrouseWebsite);
 
             // Start processing the actions
             _seleniumManager.TryExecuteNext();
@@ -40,24 +40,34 @@ namespace SeleniumManager.Tests
             {
                 Task task = Task.Run(async () =>
                 {
+                    // Enqueue the action and wait for its completion
                     await _seleniumManager.EnqueueAction(BrouseGoogleWebsite);
-                    _seleniumManager.TryExecuteNext();
-                    Thread.Sleep(2000);
+                    Thread.Sleep(3000);
                 });
 
                 tasks.Add(task);
             }
 
+            // Wait for all tasks to complete
             await Task.WhenAll(tasks);
         }
 
         [TestMethod]
-        public void TestBrouseFail()
+        public async Task TestBrouseFail()
         {
-            _seleniumManager.EnqueueAction(BrouseWebsiteFail);
+            try
+            {
+                var data = await _seleniumManager.EnqueueAction(BrouseWebsiteFail);
 
-            // Start processing the actions
-            _seleniumManager.TryExecuteNext();
+                // Start processing the actions
+                _seleniumManager.TryExecuteNext();
+
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Error Message: \n" +ex.Message);
+                Console.WriteLine("StackTrace: \n" + ex.StackTrace);
+            }
 
         }
         private string BrouseGoogleWebsite(IWebDriver driver)
@@ -66,16 +76,15 @@ namespace SeleniumManager.Tests
             try
             {
                 driver.Url = "https://www.google.com/";
-
-                //driver.Dispose();
+                Console.WriteLine(driver.Title + " Process ID:" + System.Threading.Thread.CurrentThread.ManagedThreadId);
 
             }
-            catch (Exception ex)
+            catch (Exception)
             {
 
                 throw;
             }
-            return null;
+            return string.Empty;
         }
 
         private string BrouseWebsite(IWebDriver driver)
@@ -86,16 +95,16 @@ namespace SeleniumManager.Tests
                 driver.Url = "https://dev.azure.com/Rohit-IN/Selenium%20Manager/";
 
                 driver.FindElement(By.XPath("//a[@aria-label='Repos']")).Click();
-
+                Console.WriteLine(driver.Title);
                 driver.Dispose();
 
             }
-            catch (Exception ex)
+            catch (Exception)
             {
 
                 throw;
             }
-            return null;
+            return string.Empty;
         }
         private string BrouseWebsiteFail(IWebDriver driver)
         {
@@ -107,7 +116,7 @@ namespace SeleniumManager.Tests
             {
                 throw new NoSuchElementException("Element not found.");
             }
-            return null;
+            return string.Empty;
         }
 
     }
