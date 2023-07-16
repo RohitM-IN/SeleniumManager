@@ -50,7 +50,7 @@ This include managing Queues, Parallel Tests, etc.</Description>
 
   <ItemGroup>
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
-    <PackageReference Include="Selenium.WebDriver" Version="4.9.1" />
+    <PackageReference Include="Selenium.WebDriver" Version="4.10.0" />
   </ItemGroup>
 
   <ItemGroup>
