@@ -6,6 +6,7 @@ using OpenQA.Selenium.Firefox;
 using OpenQA.Selenium.Remote;
 using SeleniumManager.Core.DataContract;
 using SeleniumManager.Core.Interface;
+using SeleniumManager.Core.Utils;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -273,13 +274,7 @@ namespace SeleniumManager.Core
 
         private async Task<string> FindBestAvailableBrowser()
         {
-            var statistics = new Dictionary<string, int>()
-            {
-                { "Chrome", 8 },
-                { "MicrosoftEdge", 8 },
-                { "Firefox", 0 },
-                { "Internet Explorer", 0 }
-            };
+            var statistics = RatioDictionary.GetRatioDictionary(_configSettings.statistics, MaxSessions);
 
             foreach (var kvp in statistics.OrderByDescending(x => x.Value))
             {
