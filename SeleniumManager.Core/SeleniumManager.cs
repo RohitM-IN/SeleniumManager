@@ -1,10 +1,7 @@
-﻿using Newtonsoft.Json.Linq;
-using OpenQA.Selenium;
-using OpenQA.Selenium.Chrome;
-using OpenQA.Selenium.Edge;
-using OpenQA.Selenium.Firefox;
+﻿using OpenQA.Selenium;
 using OpenQA.Selenium.Remote;
 using SeleniumManager.Core.DataContract;
+using SeleniumManager.Core.Enum;
 using SeleniumManager.Core.Interface;
 using SeleniumManager.Core.Utils;
 using System;
@@ -21,12 +18,15 @@ namespace SeleniumManager.Core
     {
         #region Declerations
 
+        #region Private Properties
         private readonly SemaphoreSlim _semaphore;
         private readonly SemaphoreSlim _availableStereotypesSemaphore = new SemaphoreSlim(1, 1);
         private readonly ConcurrentQueue<Action<IWebDriver>> _queue;
         private readonly ConfigurationSettings _configSettings;
         private readonly HttpClient httpClient;
+        #endregion
 
+        #region Public Properties
         public int MaxSessions { get; private set; } = 0;
         public int FreeSessions { get; private set; } = 0;
         public int ConcurrentSessions { get; private set; } = 0;
@@ -36,11 +36,8 @@ namespace SeleniumManager.Core
         public Dictionary<string, long> ConcurrentStereotypes { get; private set; } = new();
         public Dictionary<string, long> AvailableStereotypes { get; private set; } = new();
         public DateTime LastSessionDetails { get; private set; }
-        enum AdjustType
-        {
-            Create = 1,
-            Destroy = 2
-        }
+        #endregion
+
         #endregion
 
         #region Constructor
@@ -86,6 +83,8 @@ namespace SeleniumManager.Core
             TryExecuteNext();
             return tcs.Task;
         }
+
+
         public async void TryExecuteNext()
         {
             await _semaphore.WaitAsync(); // Acquire the semaphore
@@ -129,8 +128,11 @@ namespace SeleniumManager.Core
                 }
             }
         }
+
         public virtual async Task<int> GetAvailableInstances()
         {
+            LastSessionDetails = DateTime.Now;
+
             var nodeStatus = await GetStatus();
 
             if (nodeStatus == null) return 0;
@@ -148,6 +150,7 @@ namespace SeleniumManager.Core
 
             return nodeStatus;
         }
+
 
         public virtual IWebDriver CreateDriverInstance(string? browserName = null)
         {
@@ -176,6 +179,7 @@ namespace SeleniumManager.Core
             }
             return driver;
         }
+
 
         public string GetAvailableDriverName(string? browserName)
         {
@@ -256,7 +260,6 @@ namespace SeleniumManager.Core
             _availableStereotypesSemaphore.Release();
             ConcurrentSessions = TotalSessions - FreeSessions;
             AvailableSessions = MaxSessions - ConcurrentSessions;
-            LastSessionDetails = DateTime.Now;
         }
 
         private void ResetValues()
