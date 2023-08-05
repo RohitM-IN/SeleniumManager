@@ -1,4 +1,5 @@
 ﻿using OpenQA.Selenium;
+using SeleniumManager.Core.Enum;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -115,6 +116,15 @@ namespace SeleniumManager.Core.Interface
         /// <exception cref="Exception"></exception>
         string GetAvailableDriverName(string? browserName);
 
+        /// <summary>
+        /// This Function override Enqueues an function 
+        /// in which has the first parameter supports IWebDriver and the other is the brousername you want
+        /// </summary>
+        /// <param name="action"></param>
+        /// <param name="browserName">Name of the brouser for example check WebDriverType enum</param>
+        /// <seealso cref="WebDriverType"/>
+        /// <returns></returns>
+        Task<string> EnqueueAction(Func<IWebDriver, string> action, string browserName);
         #endregion
 
     }

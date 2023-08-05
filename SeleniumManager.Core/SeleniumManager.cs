@@ -9,8 +9,10 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
+using static SeleniumManager.Core.SeleniumManager;
 
 namespace SeleniumManager.Core
 {
@@ -21,7 +23,7 @@ namespace SeleniumManager.Core
         #region Private Properties
         private readonly SemaphoreSlim _semaphore;
         private readonly SemaphoreSlim _availableStereotypesSemaphore = new SemaphoreSlim(1, 1);
-        private readonly ConcurrentQueue<Action<IWebDriver>> _queue;
+        private readonly ConcurrentQueue<ActionWithBrowser> _queue;
         private readonly ConfigurationSettings _configSettings;
         private readonly HttpClient httpClient;
         #endregion
@@ -36,6 +38,7 @@ namespace SeleniumManager.Core
         public Dictionary<string, long> ConcurrentStereotypes { get; private set; } = new();
         public Dictionary<string, long> AvailableStereotypes { get; private set; } = new();
         public DateTime LastSessionDetails { get; private set; }
+        public delegate void ActionWithBrowser(IWebDriver driver, string? browserName);
         #endregion
 
         #endregion
@@ -46,7 +49,7 @@ namespace SeleniumManager.Core
             _configSettings = configManager.configSettings;
             httpClient = new HttpClient();   
             _semaphore = new SemaphoreSlim(GetAvailableInstances().Result,1000);
-            _queue = new ConcurrentQueue<Action<IWebDriver>>();
+            _queue = new ConcurrentQueue<ActionWithBrowser>();
         }
 
         #endregion
@@ -57,7 +60,7 @@ namespace SeleniumManager.Core
         {
             var tcs = new TaskCompletionSource<string>();
 
-            _queue.Enqueue(driver =>
+            _queue.Enqueue((driver,n) =>
             {
                 try
                 {
@@ -84,6 +87,38 @@ namespace SeleniumManager.Core
             return tcs.Task;
         }
 
+        public virtual Task<string> EnqueueAction(Func<IWebDriver, string> action, string browserName)
+        {
+            var tcs = new TaskCompletionSource<string>();
+
+            _queue.Enqueue((driver,bn) =>
+            {
+                try
+                {
+                    bn = browserName;
+
+                    // Execute the action and get the result
+                    var result = action(driver);
+
+                    // Set the result as the task completion result
+                    tcs.SetResult(result);
+                }
+                catch (Exception ex)
+                {
+                    // Set the exception as the task completion exception
+                    tcs.SetException(ex);
+                    throw new Exception("Error Occoured inside Action", ex);
+                }
+                finally
+                {
+                    // Dispose the driver if not already done
+                    driver?.Dispose();
+                }
+            });
+
+            TryExecuteNext();
+            return tcs.Task;
+        }
 
         public async void TryExecuteNext()
         {
@@ -91,15 +126,20 @@ namespace SeleniumManager.Core
 
             if (_queue.TryDequeue(out var action))
             {
-                string browserName = "";
+                string? browserName = null;
+                if (action.Target != null)
+                {
+                    FieldInfo browserNameField = action.Target.GetType().GetField("browserName");
+                    browserName = (string?)browserNameField?.GetValue(action.Target);
+                }
                 // TODO: make it like get the driver first and then process the action 
                 try
                 {
                     // for now only using chrome for testing
-                    IWebDriver _driver = CreateDriverInstance();
+                    IWebDriver _driver = CreateDriverInstance(browserName);
                     ICapabilities capabilities = ((RemoteWebDriver)_driver).Capabilities;
                     browserName = capabilities.GetCapability("browserName").ToString();
-                    action(_driver);
+                    action(_driver, browserName);
                     
                     // Release driver
                     _driver.Dispose();
@@ -159,21 +199,34 @@ namespace SeleniumManager.Core
             switch (browserName.ToLower())
             {
                 case "firefox":
+                case "geko":
                     driver = new RemoteWebDriver(new Uri(_configSettings.GridHost.ToString()), _configSettings.Options.firefoxOptions);
-
                     break;
+
                 case "chrome":
                     driver = new RemoteWebDriver(new Uri(_configSettings.GridHost.ToString()), _configSettings.Options.chromeOptions);
                     break;
+
                 case "microsoftedge":
                     driver = new RemoteWebDriver(new Uri(_configSettings.GridHost.ToString()), _configSettings.Options.edgeOptions);
                     break;
+
                 case "safari":
                     driver = new RemoteWebDriver(new Uri(_configSettings.GridHost.ToString()), _configSettings.Options.safariOptions);
                     break;
+
+                // Not Tested
                 case "ie":
+                case "internetexplorer":
+                case "internet explorer":
                     driver = new RemoteWebDriver(new Uri(_configSettings.GridHost.ToString()), _configSettings.Options.internetExplorerOptions);
                     break;
+
+                // Not Tested
+                case "opera":
+                    driver = new RemoteWebDriver(new Uri(_configSettings.GridHost.ToString()), _configSettings.Options.operaOptions);
+                    break;
+
                 default:
                     throw new ArgumentException("Browser not supported yet!");
             }

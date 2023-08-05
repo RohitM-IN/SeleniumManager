@@ -32,6 +32,16 @@ namespace SeleniumManager.Tests
         }
 
         [TestMethod]
+        public async Task TestBrouseChrome()
+        {
+            var data = await _seleniumManager.EnqueueAction(BrouseWebsite, "chrome");
+
+            // Start processing the actions
+            _seleniumManager.TryExecuteNext();
+
+        }
+
+        [TestMethod]
         public async Task ParallelTestBrouse()
         {
             List<Task> tasks = new List<Task>();
