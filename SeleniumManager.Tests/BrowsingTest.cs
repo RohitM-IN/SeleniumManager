@@ -1,5 +1,6 @@
 ﻿using OpenQA.Selenium;
 using SeleniumManager.Core;
+using SeleniumManager.Core.Enum;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -34,11 +35,32 @@ namespace SeleniumManager.Tests
         [TestMethod]
         public async Task TestBrouseChrome()
         {
-            var data = await _seleniumManager.EnqueueAction(BrouseWebsite, "chrome");
+            // or pass 'chrome' case sensitive
+            var data = await _seleniumManager.EnqueueAction(BrouseWebsite, WebDriverType.Chrome.GetDescription());
 
             // Start processing the actions
             _seleniumManager.TryExecuteNext();
 
+        }
+        [TestMethod]
+        public async Task TestBrouseFirefox()
+        {
+            // or pass 'firefox' case sensitive
+            var data = await _seleniumManager.EnqueueAction(BrouseWebsite, WebDriverType.Firefox.GetDescription());
+
+            // Start processing the actions
+            _seleniumManager.TryExecuteNext();
+
+        }
+
+        [TestMethod]
+        public async Task TestBrouseEdge()
+        {
+            // or pass 'MicorsoftEdge' case sensitive
+            var data = await _seleniumManager.EnqueueAction(BrouseWebsite, WebDriverType.MicrosoftEdge.GetDescription());
+
+            // Start processing the actions
+            _seleniumManager.TryExecuteNext();
         }
 
         [TestMethod]
