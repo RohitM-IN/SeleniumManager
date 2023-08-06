@@ -354,7 +354,7 @@ namespace SeleniumManager.Core
             }
 
             // If no available browser is found, return the browser with the highest instances count
-            return statistics.OrderByDescending(x => x.Value).FirstOrDefault().Key ?? "Chrome";
+            return statistics.OrderByDescending(x => x.Value).FirstOrDefault().Key ?? WebDriverType.Chrome.GetDescription();
         }
 
         private void AdjustInstance(string key,AdjustType type)

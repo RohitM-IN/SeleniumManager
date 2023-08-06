@@ -22,5 +22,7 @@ namespace SeleniumManager.Core.Enum
         InternetExplorer = 5,
         [Description("Opera")]
         Opera = 6,
+        [Description("Custom")]
+        Custom = 7,
     }
 }

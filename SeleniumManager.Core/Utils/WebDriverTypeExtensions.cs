@@ -1,4 +1,5 @@
-﻿using System;
+﻿using SeleniumManager.Core.Enum;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
@@ -7,10 +8,17 @@ using System.Text;
 using System.Threading.Tasks;
 
 
-public static class EnumExtensions
+public static class WebDriverTypeExtensions
 {
-    public static string GetEnumDescription(this Enum value)
+    private static readonly Dictionary<WebDriverType, string> customDescriptions = new Dictionary<WebDriverType, string>();
+
+    public static string GetDescription(this WebDriverType value)
     {
+        if (customDescriptions.TryGetValue(value, out string customDescription))
+        {
+            return customDescription;
+        }
+
         Type enumType = value.GetType();
         string name = Enum.GetName(enumType, value);
 
@@ -28,6 +36,11 @@ public static class EnumExtensions
         }
 
         return value.ToString();
+    }
+
+    public static void SetCustomDescription(WebDriverType type, string description)
+    {
+        customDescriptions[type] = description;
     }
 }
 
