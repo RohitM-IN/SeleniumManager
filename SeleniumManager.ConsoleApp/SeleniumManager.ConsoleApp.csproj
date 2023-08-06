@@ -12,8 +12,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Update="selenium-server-4.9.1.jar">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    <None Update="selenium-server-4.11.0.jar">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Update="start.bat">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>

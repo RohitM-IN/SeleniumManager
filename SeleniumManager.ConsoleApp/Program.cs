@@ -8,7 +8,7 @@ namespace SeleniumManager.ConsoleApp
         static Process p;
         static void Main(string[] args)
         {
-            string jarName = "selenium-server-4.9.1.jar"; // Name of your JAR file
+            string jarName = "selenium-server-4.11.0.jar"; // Name of your JAR file
             string jarPath = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), jarName); // Path to your JAR file
             string arguments = $@" -jar {jarPath} standalone ";// --config D:\dev\C#\SeleniumManager\SeleniumManager.ConsoleApp\myconfig.toml";//--driver-implementation \"Chrome\"";
             ProcessStartInfo psi = new ProcessStartInfo("java", arguments);
