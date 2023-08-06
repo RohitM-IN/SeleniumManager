@@ -20,6 +20,7 @@ namespace SeleniumManager.Core.DataContract
         public EdgeOptions edgeOptions { get; set; } = GetEdgeOptions();
         public InternetExplorerOptions internetExplorerOptions { get; set; } = GetInternetExplorerOptions();
         public SafariOptions safariOptions { get; set; } = GetSafariOptions();
+        public ChromeOptions operaOptions { get; set; } = GetChromeOptions();
 
         public static ChromeOptions GetChromeOptions()
         {
@@ -39,8 +40,8 @@ namespace SeleniumManager.Core.DataContract
 #if !DEBUG
             firefoxOptions.AddArgument("headless");
 #endif
-            firefoxOptions.AddArgument("disable-gpu");
-            firefoxOptions.AddArgument("no-sandbox");
+            //firefoxOptions.AddArgument("disable-gpu");
+            //firefoxOptions.AddArgument("no-sandbox");
             firefoxOptions.AddArgument("--blink-settings=imagesEnabled=false");
             return firefoxOptions;
         }

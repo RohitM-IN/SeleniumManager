@@ -12,8 +12,18 @@ namespace SeleniumManager.Core
 {
     public class ConfigManager
     {
+        #region Declaration
+        
         public readonly ConfigurationSettings configSettings;
 
+        #endregion
+
+        #region Public Functions
+
+        /// <summary>
+        /// This function sets the config required for the Selenium Manager
+        /// </summary>
+        /// <param name="configFilePath"></param>
         public ConfigManager(string? configFilePath = null)
         {
             if (string.IsNullOrEmpty(configFilePath))
@@ -27,6 +37,10 @@ namespace SeleniumManager.Core
                 configSettings = LoadConfigSettingsFromFile(configFilePath);
             }
         }
+
+        #endregion
+
+        #region Private Functions
 
         private ConfigurationSettings LoadConfigSettingsFromResource(string resourceName)
         {
@@ -68,5 +82,8 @@ namespace SeleniumManager.Core
                 return LoadConfigSettingsFromResource("SeleniumManager.Core.Configuration.config.json");
             }
         }
+
+        #endregion
+
     }
 }

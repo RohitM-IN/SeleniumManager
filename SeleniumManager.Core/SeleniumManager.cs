@@ -1,10 +1,7 @@
-﻿using Newtonsoft.Json.Linq;
-using OpenQA.Selenium;
-using OpenQA.Selenium.Chrome;
-using OpenQA.Selenium.Edge;
-using OpenQA.Selenium.Firefox;
+﻿using OpenQA.Selenium;
 using OpenQA.Selenium.Remote;
 using SeleniumManager.Core.DataContract;
+using SeleniumManager.Core.Enum;
 using SeleniumManager.Core.Interface;
 using SeleniumManager.Core.Utils;
 using System;
@@ -12,8 +9,10 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
+using static SeleniumManager.Core.SeleniumManager;
 
 namespace SeleniumManager.Core
 {
@@ -21,12 +20,15 @@ namespace SeleniumManager.Core
     {
         #region Declerations
 
+        #region Private Properties
         private readonly SemaphoreSlim _semaphore;
         private readonly SemaphoreSlim _availableStereotypesSemaphore = new SemaphoreSlim(1, 1);
-        private readonly ConcurrentQueue<Action<IWebDriver>> _queue;
+        private readonly ConcurrentQueue<ActionWithBrowser> _queue;
         private readonly ConfigurationSettings _configSettings;
         private readonly HttpClient httpClient;
+        #endregion
 
+        #region Public Properties
         public int MaxSessions { get; private set; } = 0;
         public int FreeSessions { get; private set; } = 0;
         public int ConcurrentSessions { get; private set; } = 0;
@@ -36,11 +38,9 @@ namespace SeleniumManager.Core
         public Dictionary<string, long> ConcurrentStereotypes { get; private set; } = new();
         public Dictionary<string, long> AvailableStereotypes { get; private set; } = new();
         public DateTime LastSessionDetails { get; private set; }
-        enum AdjustType
-        {
-            Create = 1,
-            Destroy = 2
-        }
+        public delegate void ActionWithBrowser(IWebDriver driver, string? browserName);
+        #endregion
+
         #endregion
 
         #region Constructor
@@ -49,7 +49,7 @@ namespace SeleniumManager.Core
             _configSettings = configManager.configSettings;
             httpClient = new HttpClient();   
             _semaphore = new SemaphoreSlim(GetAvailableInstances().Result,1000);
-            _queue = new ConcurrentQueue<Action<IWebDriver>>();
+            _queue = new ConcurrentQueue<ActionWithBrowser>();
         }
 
         #endregion
@@ -60,7 +60,7 @@ namespace SeleniumManager.Core
         {
             var tcs = new TaskCompletionSource<string>();
 
-            _queue.Enqueue(driver =>
+            _queue.Enqueue((driver,n) =>
             {
                 try
                 {
@@ -86,21 +86,60 @@ namespace SeleniumManager.Core
             TryExecuteNext();
             return tcs.Task;
         }
+
+        public virtual Task<string> EnqueueAction(Func<IWebDriver, string> action, string browserName)
+        {
+            var tcs = new TaskCompletionSource<string>();
+
+            _queue.Enqueue((driver,bn) =>
+            {
+                try
+                {
+                    bn = browserName;
+
+                    // Execute the action and get the result
+                    var result = action(driver);
+
+                    // Set the result as the task completion result
+                    tcs.SetResult(result);
+                }
+                catch (Exception ex)
+                {
+                    // Set the exception as the task completion exception
+                    tcs.SetException(ex);
+                    throw new Exception("Error Occoured inside Action", ex);
+                }
+                finally
+                {
+                    // Dispose the driver if not already done
+                    driver?.Dispose();
+                }
+            });
+
+            TryExecuteNext();
+            return tcs.Task;
+        }
+
         public async void TryExecuteNext()
         {
             await _semaphore.WaitAsync(); // Acquire the semaphore
 
             if (_queue.TryDequeue(out var action))
             {
-                string browserName = "";
+                string? browserName = null;
+                if (action.Target != null)
+                {
+                    FieldInfo browserNameField = action.Target.GetType().GetField("browserName");
+                    browserName = (string?)browserNameField?.GetValue(action.Target);
+                }
                 // TODO: make it like get the driver first and then process the action 
                 try
                 {
                     // for now only using chrome for testing
-                    IWebDriver _driver = CreateDriverInstance();
+                    IWebDriver _driver = CreateDriverInstance(browserName);
                     ICapabilities capabilities = ((RemoteWebDriver)_driver).Capabilities;
                     browserName = capabilities.GetCapability("browserName").ToString();
-                    action(_driver);
+                    action(_driver, browserName);
                     
                     // Release driver
                     _driver.Dispose();
@@ -129,8 +168,11 @@ namespace SeleniumManager.Core
                 }
             }
         }
+
         public virtual async Task<int> GetAvailableInstances()
         {
+            LastSessionDetails = DateTime.Now;
+
             var nodeStatus = await GetStatus();
 
             if (nodeStatus == null) return 0;
@@ -149,6 +191,7 @@ namespace SeleniumManager.Core
             return nodeStatus;
         }
 
+
         public virtual IWebDriver CreateDriverInstance(string? browserName = null)
         {
             IWebDriver driver;
@@ -156,26 +199,40 @@ namespace SeleniumManager.Core
             switch (browserName.ToLower())
             {
                 case "firefox":
+                case "geko":
                     driver = new RemoteWebDriver(new Uri(_configSettings.GridHost.ToString()), _configSettings.Options.firefoxOptions);
-
                     break;
+
                 case "chrome":
                     driver = new RemoteWebDriver(new Uri(_configSettings.GridHost.ToString()), _configSettings.Options.chromeOptions);
                     break;
+
                 case "microsoftedge":
                     driver = new RemoteWebDriver(new Uri(_configSettings.GridHost.ToString()), _configSettings.Options.edgeOptions);
                     break;
+
                 case "safari":
                     driver = new RemoteWebDriver(new Uri(_configSettings.GridHost.ToString()), _configSettings.Options.safariOptions);
                     break;
+
+                // Not Tested
                 case "ie":
+                case "internetexplorer":
+                case "internet explorer":
                     driver = new RemoteWebDriver(new Uri(_configSettings.GridHost.ToString()), _configSettings.Options.internetExplorerOptions);
                     break;
+
+                // Not Tested
+                case "opera":
+                    driver = new RemoteWebDriver(new Uri(_configSettings.GridHost.ToString()), _configSettings.Options.operaOptions);
+                    break;
+
                 default:
                     throw new ArgumentException("Browser not supported yet!");
             }
             return driver;
         }
+
 
         public string GetAvailableDriverName(string? browserName)
         {
@@ -256,7 +313,6 @@ namespace SeleniumManager.Core
             _availableStereotypesSemaphore.Release();
             ConcurrentSessions = TotalSessions - FreeSessions;
             AvailableSessions = MaxSessions - ConcurrentSessions;
-            LastSessionDetails = DateTime.Now;
         }
 
         private void ResetValues()
@@ -298,7 +354,7 @@ namespace SeleniumManager.Core
             }
 
             // If no available browser is found, return the browser with the highest instances count
-            return statistics.OrderByDescending(x => x.Value).FirstOrDefault().Key ?? "Chrome";
+            return statistics.OrderByDescending(x => x.Value).FirstOrDefault().Key ?? WebDriverType.Chrome.GetDescription();
         }
 
         private void AdjustInstance(string key,AdjustType type)
