@@ -132,11 +132,9 @@ namespace SeleniumManager.Core
                     FieldInfo browserNameField = action.Target.GetType().GetField("browserName");
                     browserName = (string?)browserNameField?.GetValue(action.Target);
                 }
-                // TODO: make it like get the driver first and then process the action 
+                IWebDriver _driver = CreateDriverInstance(browserName); 
                 try
                 {
-                    // for now only using chrome for testing
-                    IWebDriver _driver = CreateDriverInstance(browserName);
                     ICapabilities capabilities = ((RemoteWebDriver)_driver).Capabilities;
                     browserName = capabilities.GetCapability("browserName").ToString();
                     action(_driver, browserName);
@@ -151,6 +149,7 @@ namespace SeleniumManager.Core
                 {
                     // Release the semaphore even if an exception occurs
                     _semaphore.Release();
+                    _driver?.Dispose();
 
                     // Recursively call TryExecuteNext to process the next action in the queue
                     TryExecuteNext();

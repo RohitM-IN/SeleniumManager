@@ -18,7 +18,7 @@ namespace SeleniumManager.Core.Enum
         Firefox = 3,
         [Description("safari")]
         Safari = 4,
-        [Description("InternetExplorer")]
+        [Description("internet explorer")]
         InternetExplorer = 5,
         [Description("opera")]
         Opera = 6,
