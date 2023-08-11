@@ -14,8 +14,8 @@
 This include managing Queues, Parallel Tests, etc.</Description>
     <Copyright>MIT License</Copyright>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
-	<AssemblyVersion>0.0.0.4</AssemblyVersion>
-	<Version>0.0.0.4-alpha</Version>
+	<AssemblyVersion>0.0.0.5</AssemblyVersion>
+	<Version>0.0.0.5-alpha</Version>
 	<GenerateDocumentationFile>True</GenerateDocumentationFile>
   </PropertyGroup>
 
