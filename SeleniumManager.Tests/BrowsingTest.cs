@@ -1,5 +1,6 @@
 ﻿using OpenQA.Selenium;
 using SeleniumManager.Core;
+using SeleniumManager.Core.Enum;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -24,7 +25,7 @@ namespace SeleniumManager.Tests
         [TestMethod]
         public async Task TestBrouse()
         {
-            var data = await _seleniumManager.EnqueueAction(BrouseWebsite);
+            var data = await _seleniumManager.EnqueueAction(BrowseWebsite);
 
             // Start processing the actions
             _seleniumManager.TryExecuteNext();
@@ -34,11 +35,41 @@ namespace SeleniumManager.Tests
         [TestMethod]
         public async Task TestBrouseChrome()
         {
-            var data = await _seleniumManager.EnqueueAction(BrouseWebsite, "chrome");
+            // or pass 'chrome' case sensitive
+            var data = await _seleniumManager.EnqueueAction(BrowseWebsite, WebDriverType.Chrome.GetDescription());
 
             // Start processing the actions
             _seleniumManager.TryExecuteNext();
 
+        }
+        [TestMethod]
+        public async Task TestBrouseFirefox()
+        {
+            // or pass 'firefox' case sensitive
+            var data = await _seleniumManager.EnqueueAction(BrowseWebsite, WebDriverType.Firefox.GetDescription());
+
+            // Start processing the actions
+            _seleniumManager.TryExecuteNext();
+
+        }
+        [TestMethod]
+        public async Task TestBrouseIE()
+        {
+            // or pass 'firefox' case sensitive
+            var data = await _seleniumManager.EnqueueAction(BrowseGoogleWebsite, WebDriverType.InternetExplorer.GetDescription());
+
+            // Start processing the actions
+            _seleniumManager.TryExecuteNext();
+
+        }
+        [TestMethod]
+        public async Task TestBrouseEdge()
+        {
+            // or pass 'MicorsoftEdge' case sensitive
+            var data = await _seleniumManager.EnqueueAction(BrowseWebsite, WebDriverType.MicrosoftEdge.GetDescription());
+
+            // Start processing the actions
+            _seleniumManager.TryExecuteNext();
         }
 
         [TestMethod]
@@ -51,7 +82,7 @@ namespace SeleniumManager.Tests
                 Task task = Task.Run(async () =>
                 {
                     // Enqueue the action and wait for its completion
-                    await _seleniumManager.EnqueueAction(BrouseGoogleWebsite);
+                    await _seleniumManager.EnqueueAction(BrowseGoogleWebsite);
                     Thread.Sleep(3000);
                 });
 
@@ -80,7 +111,7 @@ namespace SeleniumManager.Tests
             }
 
         }
-        private string BrouseGoogleWebsite(IWebDriver driver)
+        private string BrowseGoogleWebsite(IWebDriver driver)
         {
             // 
             try
@@ -97,7 +128,7 @@ namespace SeleniumManager.Tests
             return string.Empty;
         }
 
-        private string BrouseWebsite(IWebDriver driver)
+        private string BrowseWebsite(IWebDriver driver)
         {
             // 
             try

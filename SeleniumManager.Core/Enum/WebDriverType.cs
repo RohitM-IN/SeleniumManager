@@ -10,17 +10,17 @@ namespace SeleniumManager.Core.Enum
     public enum WebDriverType
     {
         None = 0,
-        [Description("Chrome")]
+        [Description("chrome")]
         Chrome = 1,
-        [Description("Microsoft Edge")]
-        Microsoft_Edge = 2,
-        [Description("Firefox")]
+        [Description("MicrosoftEdge")]
+        MicrosoftEdge = 2,
+        [Description("firefox")]
         Firefox = 3,
-        [Description("Safari")]
+        [Description("safari")]
         Safari = 4,
-        [Description("InternetExplorer")]
+        [Description("internet explorer")]
         InternetExplorer = 5,
-        [Description("Opera")]
+        [Description("opera")]
         Opera = 6,
         [Description("Custom")]
         Custom = 7,
