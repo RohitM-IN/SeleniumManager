@@ -1,19 +1,13 @@
 ﻿using Newtonsoft.Json;
 using SeleniumManager.Core.DataContract;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Reflection;
-using System.Text;
-using System.Text.Json;
-using System.Threading.Tasks;
 
 namespace SeleniumManager.Core
 {
     public class ConfigManager
     {
         #region Declaration
-        
+
         public readonly ConfigurationSettings configSettings;
 
         #endregion
@@ -62,7 +56,7 @@ namespace SeleniumManager.Core
             {
                 string configJson = File.ReadAllText(configFilePath);
                 return JsonConvert.DeserializeObject<ConfigurationSettings>(configJson);
-                }
+            }
             catch (FileNotFoundException)
             {
                 // Handle missing config file

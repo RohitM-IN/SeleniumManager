@@ -1,15 +1,8 @@
-﻿using OpenQA.Selenium;
-using OpenQA.Selenium.Chrome;
-using OpenQA.Selenium.Chromium;
+﻿using OpenQA.Selenium.Chrome;
 using OpenQA.Selenium.Edge;
 using OpenQA.Selenium.Firefox;
 using OpenQA.Selenium.IE;
 using OpenQA.Selenium.Safari;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace SeleniumManager.Core.DataContract
 {
@@ -37,11 +30,12 @@ namespace SeleniumManager.Core.DataContract
         public static FirefoxOptions GetFirefoxOptions()
         {
             var firefoxOptions = new FirefoxOptions();
+
 #if !DEBUG
-            firefoxOptions.AddArgument("headless");
+            firefoxOptions.AddArgument("-headless");
 #endif
-            //firefoxOptions.AddArgument("disable-gpu");
-            //firefoxOptions.AddArgument("no-sandbox");
+            firefoxOptions.AddArgument("-disable-gpu");
+            firefoxOptions.AddArgument("-no-sandbox");
             firefoxOptions.AddArgument("--blink-settings=imagesEnabled=false");
             return firefoxOptions;
         }
@@ -60,7 +54,7 @@ namespace SeleniumManager.Core.DataContract
 
         public static InternetExplorerOptions GetInternetExplorerOptions() => new InternetExplorerOptions();
 
-        public static SafariOptions GetSafariOptions()  =>  new SafariOptions();
-        
+        public static SafariOptions GetSafariOptions() => new SafariOptions();
+
     }
 }

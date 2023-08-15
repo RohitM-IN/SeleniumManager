@@ -1,57 +1,89 @@
-# Selenium Grid Manager
+# Selenium Manager
 
-Selenium Grid Manager is a C# library designed to efficiently manage multiple Selenium WebDriver instances in parallel, making use of Selenium Grid.
-
-> Note: As a solo developer I only got time on weekends as I do have a job so you can only expect any updates on this project on weekends.
+Selenium Manager is a .NET library designed to simplify parallel testing and dynamic browser instance management using Selenium WebDriver.
 
 ## Table of Contents
 
-- [Overview](#overview)
 - [Features](#features)
 - [Installation](#installation)
 - [Usage](#usage)
-- [Configuration](#configuration)
-- [Contributing](#contributing)
+  - [Initializing Selenium Manager](#initializing-selenium-manager)
+  - [Enqueuing Actions](#enqueuing-actions)
+  - [Parallel Testing](#parallel-testing)
+- [API Reference](doc/API_REFERENCE.md)
+- [Contributing](doc/CONTRIBUTING.md)
 - [License](#license)
-
-## Overview
-
-Selenium Grid Manager is a library which simplifies the management of Selenium WebDriver instances in parallel using Selenium Grid. It provides a convenient interface for enqueueing test actions and executing them on available WebDriver instances in parallel.
 
 ## Features
 
-- Efficient management of multiple WebDriver instances in parallel
-- Automatic scaling of WebDriver instances based on the test queue
-- Retry mechanism for handling test failures
-- Configuration options for customizing the behavior
+- Simplifies parallel testing with Selenium WebDriver
+- Dynamic browser instance management
+- Automatic browser selection based on statistics
+- Customizable browser options
+- Easily integrate with your existing Selenium projects
 
 ## Installation
 
-To use Selenium Grid Manager in your C# project, you can install it via NuGet. Open the NuGet Package Manager console and run the following command:
-
-
-```bash
-Install-Package SeleniumManager.Core
-```
-
-Alternatively, you can manually add the SeleniumGridManager package reference to your project file.
-
-> Note: this package is still in developement
+To use Selenium Manager, you need to install the NuGet package `SeleniumManager.Core`.
 
 ## Usage
 
-Provide instructions and examples for using the project. Explain how to run tests, execute commands, or perform any relevant actions. Include code snippets or screenshots if applicable.
+### Initializing Selenium Manager
 
-## Configuration 
+To get started, you'll need to initialize the Selenium Manager by creating an instance of the `SeleniumManager` class. You can provide a custom configuration file path or use the default configuration included in the library.
 
-Explain any configuration options or settings that can be customized. Provide details on how to modify the configuration and what each option does. If applicable, include sample configuration files or templates.
+```csharp
+using SeleniumManager.Core;
+
+// Initialize Selenium Manager with default configuration
+var configManager = new ConfigManager();
+var seleniumManager = new SeleniumManager(configManager);
+```
+
+### Enqueuing Actions
+
+Enqueuing an action allows you to add a function to the execution queue, which will be processed in parallel on available browser instances.
+
+```csharp
+// Enqueue an action without specifying a browser
+var result = await seleniumManager.EnqueueAction(BrowseWebsite);
+
+// Enqueue an action and specify the browser
+var chromeResult = await seleniumManager.EnqueueAction(BrowseWebsite, WebDriverType.Chrome.GetDescription());
+```
+
+### Parallel Testing
+
+Selenium Manager makes it easy to perform parallel testing by enqueuing multiple actions simultaneously.
+
+```csharp
+using System.Threading.Tasks;
+using System.Collections.Generic;
+
+// Perform parallel testing with multiple tasks
+List<Task> tasks = new List<Task>();
+
+for (int i = 0; i < 10; i++)
+{
+    Task task = Task.Run(async () =>
+    {
+        await seleniumManager.EnqueueAction(BrowseWebsite);
+    });
+
+    tasks.Add(task);
+}
+
+await Task.WhenAll(tasks);
+
+```
+
+## API Reference
+
+For detailed information about the available classes, methods, and options, please refer to the [API Reference](/doc/API_REFERENCE.md).
 
 ## Contributing
-
-Contributions are welcome! If you find any issues or have suggestions for improvement, please open an issue or submit a pull request on the GitHub repository.
-
-When contributing to this project, please follow the existing coding style, write clear commit messages, and provide appropriate documentation or tests for your changes.
+Contributions to this project are welcome! For more information on how to contribute, please read the [Contributing Guidelines](/doc/CONTRIBUTING.md).
 
 ## License
 
-This project is licensed under the MIT License.
+This project is licensed under the [MIT License](/LICENSE.txt).

@@ -4,19 +4,12 @@ using SeleniumManager.Core.DataContract;
 using SeleniumManager.Core.Enum;
 using SeleniumManager.Core.Interface;
 using SeleniumManager.Core.Utils;
-using System;
 using System.Collections.Concurrent;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net.Http;
 using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
-using static SeleniumManager.Core.SeleniumManager;
 
 namespace SeleniumManager.Core
 {
-    public class SeleniumManager: ISeleniumManager
+    public class SeleniumManager : ISeleniumManager
     {
         #region Declerations
 
@@ -47,8 +40,8 @@ namespace SeleniumManager.Core
         public SeleniumManager(ConfigManager configManager)
         {
             _configSettings = configManager.configSettings;
-            httpClient = new HttpClient();   
-            _semaphore = new SemaphoreSlim(GetAvailableInstances().Result,1000);
+            httpClient = new HttpClient();
+            _semaphore = new SemaphoreSlim(GetAvailableInstances().Result, 1000);
             _queue = new ConcurrentQueue<ActionWithBrowser>();
         }
 
@@ -60,7 +53,7 @@ namespace SeleniumManager.Core
         {
             var tcs = new TaskCompletionSource<string>();
 
-            _queue.Enqueue((driver,n) =>
+            _queue.Enqueue((driver, n) =>
             {
                 try
                 {
@@ -76,8 +69,8 @@ namespace SeleniumManager.Core
                     tcs.SetException(ex);
                     throw new Exception("Error Occoured inside Action", ex);
                 }
-                finally 
-                { 
+                finally
+                {
                     // Dispose the driver if not already done
                     driver?.Dispose();
                 }
@@ -91,7 +84,7 @@ namespace SeleniumManager.Core
         {
             var tcs = new TaskCompletionSource<string>();
 
-            _queue.Enqueue((driver,bn) =>
+            _queue.Enqueue((driver, bn) =>
             {
                 try
                 {
@@ -132,13 +125,13 @@ namespace SeleniumManager.Core
                     FieldInfo browserNameField = action.Target.GetType().GetField("browserName");
                     browserName = (string?)browserNameField?.GetValue(action.Target);
                 }
-                IWebDriver _driver = CreateDriverInstance(browserName); 
+                IWebDriver _driver = CreateDriverInstance(browserName);
                 try
                 {
                     ICapabilities capabilities = ((RemoteWebDriver)_driver).Capabilities;
                     browserName = capabilities.GetCapability("browserName").ToString();
                     action(_driver, browserName);
-                    
+
                     // Release driver
                     _driver.Dispose();
 
@@ -156,8 +149,8 @@ namespace SeleniumManager.Core
 
                     throw new Exception("There was error while performing the delegate action", ex);
                 }
-                finally 
-                { 
+                finally
+                {
                     _semaphore.Release();
                     await _availableStereotypesSemaphore.WaitAsync();
                     if (!string.IsNullOrEmpty(browserName))
@@ -253,9 +246,9 @@ namespace SeleniumManager.Core
             string bestBrowser = FindBestAvailableBrowser().Result;
 
             // Return the best available browser
-            return bestBrowser;         
+            return bestBrowser;
         }
-            
+
         #endregion
 
         #region Private Methods
@@ -322,7 +315,7 @@ namespace SeleniumManager.Core
         private bool IsBrowserAvailable(string browserName)
         {
             AvailableStereotypes.TryGetValue(browserName, out var _maxSessions);
-            if(_maxSessions == 0 )
+            if (_maxSessions == 0)
                 return false;
             return true;
         }
@@ -339,7 +332,7 @@ namespace SeleniumManager.Core
                 ConcurrentStereotypes.TryGetValue(kvp.Key.ToLower(), out var concurrentInstances);
                 AvailableStereotypes.TryGetValue(kvp.Key.ToLower(), out var availableInstances);
 
-                if (maxInstances >= concurrentInstances  && !string.IsNullOrEmpty(browserName))
+                if (maxInstances >= concurrentInstances && !string.IsNullOrEmpty(browserName))
                 {
 
                     AdjustInstance(browserName.ToLower(), AdjustType.Create);
@@ -356,15 +349,15 @@ namespace SeleniumManager.Core
             return statistics.OrderByDescending(x => x.Value).FirstOrDefault().Key ?? WebDriverType.Chrome.GetDescription();
         }
 
-        private void AdjustInstance(string key,AdjustType type)
+        private void AdjustInstance(string key, AdjustType type)
         {
             switch (type)
             {
                 case AdjustType.Create:
-                    if(ConcurrentStereotypes.ContainsKey(key))
+                    if (ConcurrentStereotypes.ContainsKey(key))
                         ConcurrentStereotypes[key]++;
 
-                    if(AvailableStereotypes.ContainsKey(key))
+                    if (AvailableStereotypes.ContainsKey(key))
                         AvailableStereotypes[key]--;
 
                     break;
