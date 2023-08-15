@@ -37,11 +37,12 @@ namespace SeleniumManager.Core.DataContract
         public static FirefoxOptions GetFirefoxOptions()
         {
             var firefoxOptions = new FirefoxOptions();
+
 #if !DEBUG
-            firefoxOptions.AddArgument("headless");
+            firefoxOptions.AddArgument("-headless");
 #endif
-            //firefoxOptions.AddArgument("disable-gpu");
-            //firefoxOptions.AddArgument("no-sandbox");
+            firefoxOptions.AddArgument("-disable-gpu");
+            firefoxOptions.AddArgument("-no-sandbox");
             firefoxOptions.AddArgument("--blink-settings=imagesEnabled=false");
             return firefoxOptions;
         }
