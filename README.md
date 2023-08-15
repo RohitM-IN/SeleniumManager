@@ -82,7 +82,7 @@ await Task.WhenAll(tasks);
 For detailed information about the available classes, methods, and options, please refer to the [API Reference](/doc/API_REFERENCE.md).
 
 ## Contributing
-Contributions to this project are welcome! For more information on how to contribute, please read the Contributing Guidelines.
+Contributions to this project are welcome! For more information on how to contribute, please read the [Contributing Guidelines](/doc/CONTRIBUTING.md).
 
 ## License
 
