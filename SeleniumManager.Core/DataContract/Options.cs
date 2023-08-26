@@ -8,26 +8,35 @@ namespace SeleniumManager.Core.DataContract
 {
     public class Options
     {
-        public ChromeOptions chromeOptions { get; set; } = GetChromeOptions();
-        public FirefoxOptions firefoxOptions { get; set; } = GetFirefoxOptions();
-        public EdgeOptions edgeOptions { get; set; } = GetEdgeOptions();
-        public InternetExplorerOptions internetExplorerOptions { get; set; } = GetInternetExplorerOptions();
-        public SafariOptions safariOptions { get; set; } = GetSafariOptions();
-        public ChromeOptions operaOptions { get; set; } = GetChromeOptions();
+        public Options()
+        {
+            chromeOptions = GetChromeOptions();
+            firefoxOptions = GetFirefoxOptions();
+            edgeOptions = GetEdgeOptions();
+            internetExplorerOptions = GetInternetExplorerOptions();
+            safariOptions = GetSafariOptions();
+            operaOptions = GetChromeOptions();
+        }
+        public ChromeOptions chromeOptions { get; set; }
+        public FirefoxOptions firefoxOptions { get; set; }
+        public EdgeOptions edgeOptions { get; set; }
+        public InternetExplorerOptions internetExplorerOptions { get; set; }
+        public SafariOptions safariOptions { get; set; }
+        public ChromeOptions operaOptions { get; set; }
 
-        public static ChromeOptions GetChromeOptions()
+        public virtual ChromeOptions GetChromeOptions()
         {
             var chromeOptions = new ChromeOptions();
 #if !DEBUG
             chromeOptions.AddArgument("headless");
 #endif
             chromeOptions.AddArgument("disable-gpu");
-            chromeOptions.AddArgument("no-sandbox");
+            //chromeOptions.AddArgument("no-sandbox");
             chromeOptions.AddArgument("--blink-settings=imagesEnabled=false");
             return chromeOptions;
         }
 
-        public static FirefoxOptions GetFirefoxOptions()
+        public virtual FirefoxOptions GetFirefoxOptions()
         {
             var firefoxOptions = new FirefoxOptions();
 
@@ -40,21 +49,21 @@ namespace SeleniumManager.Core.DataContract
             return firefoxOptions;
         }
 
-        public static EdgeOptions GetEdgeOptions()
+        public virtual EdgeOptions GetEdgeOptions()
         {
             var edgeOptions = new EdgeOptions();
 #if !DEBUG
             edgeOptions.AddArgument("headless");
 #endif
             edgeOptions.AddArgument("disable-gpu");
-            edgeOptions.AddArgument("no-sandbox");
+            //edgeOptions.AddArgument("no-sandbox");
             edgeOptions.AddArgument("--blink-settings=imagesEnabled=false");
             return edgeOptions;
         }
 
-        public static InternetExplorerOptions GetInternetExplorerOptions() => new InternetExplorerOptions();
+        public virtual InternetExplorerOptions GetInternetExplorerOptions() => new InternetExplorerOptions();
 
-        public static SafariOptions GetSafariOptions() => new SafariOptions();
+        public virtual SafariOptions GetSafariOptions() => new SafariOptions();
 
     }
 }
