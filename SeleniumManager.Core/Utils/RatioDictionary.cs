@@ -2,28 +2,35 @@
 {
     public class RatioDictionary
     {
-        public static Dictionary<string, int> GetRatioDictionary(Dictionary<string, int> dict, int maxNumber)
+        public static Dictionary<string, int> GetRatioDictionary(Dictionary<string, double> dict, int maxNumber)
         {
+            // Calculate the total sum of values in the input dictionary
+            double totalValue = dict.Values.Sum();
+
+            // Calculate a ratio factor based on the total number and sum of values
+            double ratioFactor = maxNumber / totalValue;
+
             Dictionary<string, int> share = new Dictionary<string, int>();
-            foreach (KeyValuePair<string, int> item in dict)
+            int totalAllocated = 0;
+
+            foreach (KeyValuePair<string, double> item in dict)
             {
-                share[item.Key] = (int)(item.Value * maxNumber / sum(dict.Values));
+                // Calculate the number of instances for the current browser type
+                int instances = (int)Math.Floor(item.Value * ratioFactor);
+
+                // Store the instances count in the share dictionary
+                share[item.Key] = instances;
+
+                // Keep track of the total allocated instances
+                totalAllocated += instances;
             }
 
-            int remainingValue = maxNumber - sum(share.Values);
+            int remainingValue = maxNumber - totalAllocated;
+
+            // Distribute the remaining instances to the highest value
             if (remainingValue > 0)
             {
-                string highestValueKey = "";
-                int highestValue = 0;
-                foreach (KeyValuePair<string, int> item in share)
-                {
-                    if (item.Value > highestValue)
-                    {
-                        highestValue = item.Value;
-                        highestValueKey = item.Key;
-                    }
-                }
-
+                string highestValueKey = share.OrderByDescending(x => x.Value).First().Key;
                 share[highestValueKey] += remainingValue;
             }
 
