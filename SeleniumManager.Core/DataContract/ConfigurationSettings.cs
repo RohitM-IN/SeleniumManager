@@ -28,7 +28,6 @@
         public Dictionary<string, int> statistics { get; set; }
         public string UserName { get; set; }
         public string Password { get; set; }
-        public int MaxConcurrency { get; set; }
         public Endpoints Endpoints { get; set; }
         public Options Options { get; set; } = new Options();
     }
