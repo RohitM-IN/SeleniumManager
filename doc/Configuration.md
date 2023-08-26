@@ -45,7 +45,7 @@ The `ConfigurationSettings` class acts as a configuration hub for Selenium Manag
 - **Description**: A collection of endpoint URLs used by Selenium Manager to communicate with different parts of the Selenium Grid infrastructure. These endpoints include URLs for retrieving status, session details, and more.
 
 ### Options
-- **Type**: Options
+- **Type**: `Options`
 - **Description**: A collection of browser-specific options used to configure the behavior of WebDriver instances. This property holds sub-properties for each browser type (e.g., Chrome, Firefox) to allow you to set browser-specific options.
 
 ## Usage
@@ -92,15 +92,16 @@ var configSettings = new ConfigurationSettings
   "UserName": "",
   "Password": "",
   "statistics": {
-    "Chrome": 0.47,
+    "chrome": 0.47,
     "MicrosoftEdge": 0.38,
-    "Firefox": 0.15,
+    "firefox": 0.15,
     "Internet Explorer": 0
   },
   "endpoints": {
     "status": "/status"
   }
 }
+
 ```
 
 Using above config file
