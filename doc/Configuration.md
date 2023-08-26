@@ -62,9 +62,9 @@ var configSettings = new ConfigurationSettings
     GridHost = "http://localhost:4444/wd/hub",
     statistics = new Dictionary<string, int>
     {
-        { "chrome", 1 },
-        { "firefox", 1 },
-        { "MicrosoftEdge", 1 }
+        { "chrome", 0.5 },
+        { "firefox", 0.2 },
+        { "MicrosoftEdge", 0.3 }
     },
     UserName = "your-username",
     Password = "your-password",
@@ -92,9 +92,9 @@ var configSettings = new ConfigurationSettings
   "UserName": "",
   "Password": "",
   "statistics": {
-    "Chrome": 2,
-    "MicrosoftEdge": 1,
-    "Firefox": 1,
+    "Chrome": 0.47,
+    "MicrosoftEdge": 0.38,
+    "Firefox": 0.15,
     "Internet Explorer": 0
   },
   "endpoints": {
