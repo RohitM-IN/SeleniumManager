@@ -2,10 +2,13 @@
 using OpenQA.Selenium.Remote;
 using SeleniumManager.Core.DataContract;
 using SeleniumManager.Core.Enum;
+using SeleniumManager.Core.Exception;
 using SeleniumManager.Core.Interface;
 using SeleniumManager.Core.Utils;
 using System.Collections.Concurrent;
+using System.Net.Http.Headers;
 using System.Reflection;
+using System.Text;
 
 namespace SeleniumManager.Core
 {
@@ -63,11 +66,11 @@ namespace SeleniumManager.Core
                     // Set the result as the task completion result
                     tcs.SetResult(result);
                 }
-                catch (Exception ex)
+                catch (System.Exception ex)
                 {
                     // Set the exception as the task completion exception
                     tcs.SetException(ex);
-                    throw new Exception("Error Occoured inside Action", ex);
+                    throw new ActionExecutionException("Error Occoured inside Action", ex);
                 }
                 finally
                 {
@@ -96,11 +99,11 @@ namespace SeleniumManager.Core
                     // Set the result as the task completion result
                     tcs.SetResult(result);
                 }
-                catch (Exception ex)
+                catch (System.Exception ex)
                 {
                     // Set the exception as the task completion exception
                     tcs.SetException(ex);
-                    throw new Exception("Error Occoured inside Action", ex);
+                    throw new ActionExecutionException("Error Occoured inside Action", ex);
                 }
                 finally
                 {
@@ -138,7 +141,7 @@ namespace SeleniumManager.Core
                     // Recursively call TryExecuteNext to process the next action in the queue
                     TryExecuteNext();
                 }
-                catch (Exception ex)
+                catch (System.Exception ex)
                 {
                     // Release the semaphore even if an exception occurs
                     _semaphore.Release();
@@ -147,7 +150,7 @@ namespace SeleniumManager.Core
                     // Recursively call TryExecuteNext to process the next action in the queue
                     TryExecuteNext();
 
-                    throw new Exception("There was error while performing the delegate action", ex);
+                    throw new ActionExecutionException("There was error while performing the delegate action", ex);
                 }
                 finally
                 {
@@ -163,24 +166,41 @@ namespace SeleniumManager.Core
 
         public virtual async Task<int> GetAvailableInstances()
         {
-            LastSessionDetails = DateTime.Now;
+            try
+            {
+                var nodeStatus = await GetStatus();
 
-            var nodeStatus = await GetStatus();
+                if (nodeStatus == null) return 0;
 
-            if (nodeStatus == null) return 0;
+                LastSessionDetails = DateTime.Now;
 
-            getSessions(nodeStatus);
+                getSessions(nodeStatus);
 
-            return AvailableSessions;
+                return AvailableSessions;
+
+            }
+            catch (System.Exception ex)
+            {
+
+                throw new HttpRequestException("Cannot Get Heart Beat", ex);
+            }
         }
 
         public virtual async Task<dynamic?> GetHeartBeat()
         {
-            var nodeStatus = await GetStatus();
+            try
+            {
+                var nodeStatus = await GetStatus();
 
-            if (nodeStatus == null) return null;
+                if (nodeStatus == null) return null;
 
-            return nodeStatus;
+                return nodeStatus;
+
+            }
+            catch (System.Exception ex)
+            {
+                throw new HttpRequestException("Cannot Get Heart Beat", ex);
+            }
         }
 
 
@@ -220,7 +240,7 @@ namespace SeleniumManager.Core
                     break;
 
                 default:
-                    throw new ArgumentException("Browser not supported yet!");
+                    throw new UnsupportedBrowserException(browserName);
             }
             return driver;
         }
@@ -234,8 +254,6 @@ namespace SeleniumManager.Core
                 var data = GetHeartBeat().Result;
                 if (data != null)
                     getSessions(data);
-                else
-                    throw new Exception("Cannot Get Heart Beat");
             }
 
             // Check if the requested browser is available
@@ -271,9 +289,19 @@ namespace SeleniumManager.Core
                 return nodeStatus;
 
             }
-            catch (Exception ex)
+            catch (HttpRequestException ex)
             {
-                throw new Exception("There was en error while getting status", ex);
+                if (ex.Message.Contains("401"))
+                {
+                    throw new GridAuthenticationException("Grid authentication failed. Please check your credentials.", ex);
+                }
+
+                throw;
+
+            }
+            catch (System.Exception ex)
+            {
+                throw new System.Exception("There was an error while getting status", ex);
             }
         }
 
