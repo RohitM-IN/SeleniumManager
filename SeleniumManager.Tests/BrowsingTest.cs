@@ -19,6 +19,8 @@ namespace SeleniumManager.Tests
         public void init()
         {
             _configManager = new ConfigManager();
+            //_configManager.configSettings.UserName = "admin";
+            //_configManager.configSettings.Password = "password";
             _seleniumManager = new Core.SeleniumManager(_configManager);
         }
 
