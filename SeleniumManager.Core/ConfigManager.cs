@@ -1,5 +1,6 @@
 ﻿using Newtonsoft.Json;
 using SeleniumManager.Core.DataContract;
+using SeleniumManager.Core.Exception;
 using System.Reflection;
 
 namespace SeleniumManager.Core
@@ -38,15 +39,24 @@ namespace SeleniumManager.Core
 
         private ConfigurationSettings LoadConfigSettingsFromResource(string resourceName)
         {
-            Assembly assembly = Assembly.GetExecutingAssembly();
-            string resourcePath = $"{assembly.GetName().Name}.{resourceName}";
-
-            using (Stream stream = assembly.GetManifestResourceStream(resourcePath))
-
-            using (StreamReader reader = new StreamReader(stream))
+            try
             {
-                string configJson = reader.ReadToEnd();
-                return JsonConvert.DeserializeObject<ConfigurationSettings>(configJson);
+                Assembly assembly = Assembly.GetExecutingAssembly();
+                string resourcePath = $"{assembly.GetName().Name}.{resourceName}";
+
+                using (Stream stream = assembly.GetManifestResourceStream(resourcePath))
+
+                using (StreamReader reader = new StreamReader(stream))
+                {
+                    string configJson = reader.ReadToEnd();
+                    return JsonConvert.DeserializeObject<ConfigurationSettings>(configJson);
+                }
+
+            }
+            catch (System.Exception ex)
+            {
+
+                throw new ConfigurationException("There was an error while loading settings from resource", ex);
             }
         }
 
@@ -59,21 +69,11 @@ namespace SeleniumManager.Core
             }
             catch (FileNotFoundException)
             {
-                // Handle missing config file
-                Console.WriteLine($"Configuration file '{configFilePath}' not found. Using default configuration.");
-                return LoadConfigSettingsFromResource("SeleniumManager.Core.Configuration.config.json");
+                throw;
             }
-            catch (Newtonsoft.Json.JsonException)
+            catch (System.Exception ex)
             {
-                // Handle invalid config file format
-                Console.WriteLine($"Invalid format in configuration file '{configFilePath}'. Using default configuration.");
-                return LoadConfigSettingsFromResource("SeleniumManager.Core.Configuration.config.json");
-            }
-            catch (Exception ex)
-            {
-                // Handle other exceptions
-                Console.WriteLine($"An error occurred while loading the configuration file: {ex.Message}. Using default configuration.");
-                return LoadConfigSettingsFromResource("SeleniumManager.Core.Configuration.config.json");
+                throw new ConfigurationException($"An error occurred while loading the configuration file: {ex.Message}", ex);
             }
         }
 
