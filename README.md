@@ -10,6 +10,7 @@ Selenium Manager is a .NET library designed to simplify parallel testing and dyn
   - [Initializing Selenium Manager](#initializing-selenium-manager)
   - [Enqueuing Actions](#enqueuing-actions)
   - [Parallel Testing](#parallel-testing)
+  - [Configuration Settings](#configuration-settings)
 - [API Reference](doc/API_REFERENCE.md)
 - [Contributing](doc/CONTRIBUTING.md)
 - [License](#license)
@@ -76,6 +77,12 @@ for (int i = 0; i < 10; i++)
 await Task.WhenAll(tasks);
 
 ```
+
+### Configuration Setting
+
+The behavior of Selenium Manager can be customized using the `ConfigurationSettings` class. This class encapsulates various configuration options related to Selenium Grid communication, browser options, concurrency, and more. For detailed information about the available properties and their usage, please refer to the [ConfigurationSettings Reference](/doc/Configuration.md).
+
+
 
 ## API Reference
 
