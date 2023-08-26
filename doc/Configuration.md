@@ -10,7 +10,6 @@ The `ConfigurationSettings` class is a core component of the Selenium Manager li
   - [statistics](#statistics)
   - [UserName](#UserName)
   - [Password](#Password)
-  - [MaxConcurrency](#MaxConcurrency)
   - [Endpoints](#Endpoints)
   - [Options](#Options)
 - [Usage](#Usage)
