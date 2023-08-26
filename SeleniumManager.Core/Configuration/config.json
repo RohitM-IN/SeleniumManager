@@ -1,21 +1,13 @@
 {
   "Gridhost": "http://127.0.0.1:4444",
-  "Secret": "",
+  "UserName": "",
+  "Password": "",
   "statistics": {
     "Chrome": 2,
     "MicrosoftEdge": 1,
     "Firefox": 1,
     "Internet Explorer": 0
   },
-  "drivers": [
-    "chrome",
-    "firefox",
-    "MicrosoftEdge"
-  ],
-  "Exclude": [
-    "InternetExplorer",
-    "Safari"
-  ],
   "endpoints": {
     "status": "/status"
   }

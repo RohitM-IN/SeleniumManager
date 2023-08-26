@@ -256,6 +256,12 @@ namespace SeleniumManager.Core
         {
             try
             {
+                if (!string.IsNullOrEmpty(_configSettings.UserName) && !string.IsNullOrEmpty(_configSettings.Password))
+                {
+                    var credentials = Convert.ToBase64String(Encoding.ASCII.GetBytes($"{_configSettings.UserName}:{_configSettings.Password}"));
+                    httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", credentials);
+                }
+
                 var response = await httpClient.GetAsync(_configSettings.GridHost + _configSettings.Endpoints.Status);
                 response.EnsureSuccessStatusCode();
 
