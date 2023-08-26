@@ -34,9 +34,9 @@ namespace SeleniumManager.Core.DataContract
 #if !DEBUG
             firefoxOptions.AddArgument("-headless");
 #endif
-            firefoxOptions.AddArgument("-disable-gpu");
-            firefoxOptions.AddArgument("-no-sandbox");
-            firefoxOptions.AddArgument("--blink-settings=imagesEnabled=false");
+            firefoxOptions.SetPreference("layers.acceleration.force-enabled", false);
+            //firefoxOptions.SetPreference("dom.ipc.sandbox.enabled", false);
+            firefoxOptions.SetPreference("permissions.default.image", 2);
             return firefoxOptions;
         }
 
