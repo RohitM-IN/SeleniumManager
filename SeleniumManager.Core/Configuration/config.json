@@ -3,9 +3,9 @@
   "UserName": "",
   "Password": "",
   "statistics": {
-    "Chrome": 2,
-    "MicrosoftEdge": 1,
-    "Firefox": 1,
+    "chrome": 0.47,
+    "MicrosoftEdge": 0.38,
+    "firefox": 0.15,
     "Internet Explorer": 0
   },
   "endpoints": {

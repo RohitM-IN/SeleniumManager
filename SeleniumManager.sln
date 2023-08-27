@@ -3,16 +3,20 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.5.33516.290
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SeleniumManager.Core", "SeleniumManager.Core\SeleniumManager.Core.csproj", "{B7FAAF9B-A860-4949-9605-A069E1B05BFB}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SeleniumManager.Core", "SeleniumManager.Core\SeleniumManager.Core.csproj", "{B7FAAF9B-A860-4949-9605-A069E1B05BFB}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{7D9E9DA4-B073-42C7-B197-E91494FB65CE}"
 	ProjectSection(SolutionItems) = preProject
 		.editorconfig = .editorconfig
+		doc\API_REFERENCE.md = doc\API_REFERENCE.md
+		doc\CODE_OF_CONDUCT.md = doc\CODE_OF_CONDUCT.md
+		doc\Configuration.md = doc\Configuration.md
+		doc\CONTRIBUTING.md = doc\CONTRIBUTING.md
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SeleniumManager.ConsoleApp", "SeleniumManager.ConsoleApp\SeleniumManager.ConsoleApp.csproj", "{BE559C8A-13DC-4C04-B959-8C968BF6A6DD}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SeleniumManager.ConsoleApp", "SeleniumManager.ConsoleApp\SeleniumManager.ConsoleApp.csproj", "{BE559C8A-13DC-4C04-B959-8C968BF6A6DD}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SeleniumManager.Tests", "SeleniumManager.Tests\SeleniumManager.Tests.csproj", "{04E33D40-4601-4D08-B0F8-A837CE94C350}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SeleniumManager.Tests", "SeleniumManager.Tests\SeleniumManager.Tests.csproj", "{04E33D40-4601-4D08-B0F8-A837CE94C350}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

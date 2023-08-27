@@ -356,31 +356,41 @@ namespace SeleniumManager.Core
 
         private async Task<string> FindBestAvailableBrowser()
         {
-            var statistics = RatioDictionary.GetRatioDictionary(_configSettings.statistics, MaxSessions);
-
-            foreach (var kvp in statistics.OrderByDescending(x => x.Value))
+            try
             {
                 await _availableStereotypesSemaphore.WaitAsync();
-                var browserName = kvp.Key;
-                var maxInstances = kvp.Value;
-                ConcurrentStereotypes.TryGetValue(kvp.Key.ToLower(), out var concurrentInstances);
-                AvailableStereotypes.TryGetValue(kvp.Key.ToLower(), out var availableInstances);
+                var statistics = RatioDictionary.GetRatioDictionary(_configSettings.statistics, MaxSessions);
 
-                if (maxInstances >= concurrentInstances && !string.IsNullOrEmpty(browserName))
+                foreach (var kvp in statistics.OrderByDescending(x => x.Value))
                 {
+                    var browserName = kvp.Key;
+                    var maxInstances = kvp.Value;
+                    ConcurrentStereotypes.TryGetValue(kvp.Key, out var concurrentInstances);
+                    AvailableStereotypes.TryGetValue(kvp.Key, out var availableInstances);
 
-                    AdjustInstance(browserName.ToLower(), AdjustType.Create);
+                    if (maxInstances > concurrentInstances && !string.IsNullOrEmpty(browserName))
+                    {
 
-                    _availableStereotypesSemaphore.Release();
-                    return browserName.ToString();
+                        AdjustInstance(browserName, AdjustType.Create);
+                        return browserName.ToString();
+                    }
+
+                    continue;
                 }
-                _availableStereotypesSemaphore.Release();
-                continue;
+
+                // If no available browser is found, return the browser with the highest instances count
+                return statistics.OrderByDescending(x => x.Value).FirstOrDefault().Key ?? WebDriverType.Chrome.GetDescription();
 
             }
+            catch (System.Exception)
+            {
 
-            // If no available browser is found, return the browser with the highest instances count
-            return statistics.OrderByDescending(x => x.Value).FirstOrDefault().Key ?? WebDriverType.Chrome.GetDescription();
+                throw;
+            }
+            finally
+            {
+                _availableStereotypesSemaphore.Release();
+            }
         }
 
         private void AdjustInstance(string key, AdjustType type)

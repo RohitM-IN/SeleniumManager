@@ -25,7 +25,7 @@
                 _GridHost = value;
             }
         }
-        public Dictionary<string, int> statistics { get; set; }
+        public Dictionary<string, double> statistics { get; set; }
         public string UserName { get; set; }
         public string Password { get; set; }
         public Endpoints Endpoints { get; set; }
