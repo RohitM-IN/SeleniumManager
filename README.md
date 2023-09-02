@@ -38,7 +38,7 @@ using SeleniumManager.Core;
 
 // Initialize Selenium Manager with default configuration
 var configManager = new ConfigManager();
-var seleniumManager = new SeleniumManager(configManager);
+var seleniumManager = new SeleniumGridManager(configManager);
 ```
 
 ### Enqueuing Actions

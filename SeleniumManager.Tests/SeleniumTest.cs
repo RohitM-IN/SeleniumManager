@@ -9,14 +9,14 @@ namespace SeleniumManager.Tests
     [TestClass]
     public class SeleniumTest
     {
-        private Core.SeleniumManager _seleniumManager;
+        private Core.SeleniumGridManager _seleniumManager;
         private ConfigManager? _configManager;
 
         [TestInitialize()]
         public void init()
         {
             _configManager = new ConfigManager();
-            _seleniumManager = new Core.SeleniumManager(_configManager);
+            _seleniumManager = new Core.SeleniumGridManager(_configManager);
         }
 
         [TestMethod]

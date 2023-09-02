@@ -12,7 +12,7 @@ using System.Text;
 
 namespace SeleniumManager.Core
 {
-    public class SeleniumManager : ISeleniumManager
+    public class SeleniumGridManager : ISeleniumManager
     {
         #region Declerations
 
@@ -40,7 +40,7 @@ namespace SeleniumManager.Core
         #endregion
 
         #region Constructor
-        public SeleniumManager(ConfigManager configManager)
+        public SeleniumGridManager(ConfigManager configManager)
         {
             _configSettings = configManager.configSettings;
             httpClient = new HttpClient();

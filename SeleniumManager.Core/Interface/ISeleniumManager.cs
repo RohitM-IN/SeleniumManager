@@ -95,7 +95,7 @@ namespace SeleniumManager.Core.Interface
         /// </summary>
         /// <param name="action">Action</param>
         /// <code> 
-        /// manager = new SeleniumManager(); 
+        /// manager = new SeleniumGridManager(); 
         /// manager.EnqueueAction(SomeFunction); 
         /// string SomeFunction(IWebDriver driver) { }
         /// </code>
