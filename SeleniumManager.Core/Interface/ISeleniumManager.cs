@@ -101,7 +101,7 @@ namespace SeleniumManager.Core.Interface
         /// </code>
         /// <returns>TaskCompletionSource string</returns>
         /// <exception cref="Exception"></exception>
-        Task<string> EnqueueAction(Func<IWebDriver, string> action);
+        Task<TResult> EnqueueAction<TResult>(Func<IWebDriver, TResult> action);
 
         /// <summary>
         /// This function checks if the browser is available or not.
@@ -119,7 +119,7 @@ namespace SeleniumManager.Core.Interface
         /// <param name="browserName">Name of the brouser for example check WebDriverType enum</param>
         /// <seealso cref="WebDriverType"/>
         /// <returns></returns>
-        Task<string> EnqueueAction(Func<IWebDriver, string> action, string browserName);
+        Task<TResult> EnqueueAction<TResult>(Func<IWebDriver, TResult> action, string browserName);
         #endregion
 
     }

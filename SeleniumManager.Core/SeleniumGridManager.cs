@@ -9,6 +9,7 @@ using System.Collections.Concurrent;
 using System.Net.Http.Headers;
 using System.Reflection;
 using System.Text;
+using System;
 
 namespace SeleniumManager.Core
 {
@@ -52,9 +53,9 @@ namespace SeleniumManager.Core
 
         #region Public Methods
 
-        public virtual Task<string> EnqueueAction(Func<IWebDriver, string> action)
+        public virtual Task<TResult> EnqueueAction<TResult>(Func<IWebDriver, TResult> action)
         {
-            var tcs = new TaskCompletionSource<string>();
+            var tcs = new TaskCompletionSource<TResult>();
 
             _queue.Enqueue((driver, n) =>
             {
@@ -83,9 +84,9 @@ namespace SeleniumManager.Core
             return tcs.Task;
         }
 
-        public virtual Task<string> EnqueueAction(Func<IWebDriver, string> action, string browserName)
+        public virtual Task<TResult> EnqueueAction<TResult>(Func<IWebDriver, TResult> action, string browserName)
         {
-            var tcs = new TaskCompletionSource<string>();
+            var tcs = new TaskCompletionSource<TResult>();
 
             _queue.Enqueue((driver, bn) =>
             {
