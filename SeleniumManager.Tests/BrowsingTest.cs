@@ -12,7 +12,7 @@ namespace SeleniumManager.Tests
     [TestClass]
     public class BrowsingTest
     {
-        private Core.SeleniumManager _seleniumManager;
+        private Core.SeleniumGridManager _seleniumManager;
         private ConfigManager? _configManager;
 
         [TestInitialize()]
@@ -21,7 +21,7 @@ namespace SeleniumManager.Tests
             _configManager = new ConfigManager();
             //_configManager.configSettings.UserName = "admin";
             //_configManager.configSettings.Password = "password";
-            _seleniumManager = new Core.SeleniumManager(_configManager);
+            _seleniumManager = new Core.SeleniumGridManager(_configManager);
         }
 
         [TestMethod]
