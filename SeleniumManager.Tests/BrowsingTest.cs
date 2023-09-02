@@ -113,7 +113,7 @@ namespace SeleniumManager.Tests
             }
 
         }
-        private string BrowseGoogleWebsite(IWebDriver driver)
+        private bool BrowseGoogleWebsite(IWebDriver driver)
         {
             // 
             try
@@ -127,10 +127,10 @@ namespace SeleniumManager.Tests
 
                 throw;
             }
-            return string.Empty;
+            return true;
         }
 
-        private string BrowseWebsite(IWebDriver driver)
+        private int BrowseWebsite(IWebDriver driver)
         {
             // 
             try
@@ -147,9 +147,9 @@ namespace SeleniumManager.Tests
 
                 throw;
             }
-            return string.Empty;
+            return 0;
         }
-        private string BrouseWebsiteFail(IWebDriver driver)
+        private bool BrouseWebsiteFail(IWebDriver driver)
         {
             // 
             driver.Url = "https://dev.azure.com/Rohit-IN/Selenium%20Manager/";
@@ -159,7 +159,7 @@ namespace SeleniumManager.Tests
             {
                 throw new NoSuchElementException("Element not found.");
             }
-            return string.Empty;
+            return false;
         }
 
     }
