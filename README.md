@@ -31,7 +31,7 @@ To use Selenium Manager, you need to install the NuGet package `SeleniumManager.
 
 ### Initializing Selenium Manager
 
-To get started, you'll need to initialize the Selenium Manager by creating an instance of the `SeleniumManager` class. You can provide a custom configuration file path or use the default configuration included in the library.
+To get started, you'll need to initialize the Selenium Manager by creating an instance of the `SeleniumGridManager` class. You can provide a custom configuration file path or use the default configuration included in the library.
 
 ```csharp
 using SeleniumManager.Core;
